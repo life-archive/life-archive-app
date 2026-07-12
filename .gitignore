@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# renderer runtime cache
+/.laf-system/
+
 # production
 /build
 

@@ -1,0 +1,119 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { tryOpenArchive } from "@/lib/life";
+
+import { ArchiveUnavailable } from "../../ArchiveUnavailable";
+import { ArchivePageFooter } from "../../ArchivePageFooter";
+import { ArchiveNav } from "../../ArchiveNav";
+import { pillActionLink } from "../../design";
+import { I18nProvider, T } from "../../i18n/I18nProvider";
+import {
+  archivePageMetadata,
+  archiveUnavailableMetadata,
+} from "../../pageMetadata";
+
+type EntryPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export async function generateMetadata({ params }: EntryPageProps) {
+  const { id } = await params;
+  const archiveResult = await tryOpenArchive();
+
+  if (!archiveResult.ok) {
+    return archiveUnavailableMetadata();
+  }
+
+  const archive = archiveResult.archive;
+  const manifest = archive.getManifest();
+  const entry = archive.getEntry(id);
+
+  return archivePageMetadata(
+    manifest.title,
+    entry?.title ?? "Entry not found",
+    "Entry",
+  );
+}
+
+export async function generateStaticParams() {
+  const archiveResult = await tryOpenArchive();
+
+  if (!archiveResult.ok) {
+    return [];
+  }
+
+  const archive = archiveResult.archive;
+
+  return archive.getEntries().map((entry) => ({
+    id: entry.id,
+  }));
+}
+
+export default async function EntryPage({ params }: EntryPageProps) {
+  const { id } = await params;
+  const archiveResult = await tryOpenArchive();
+
+  if (!archiveResult.ok) {
+    return <ArchiveUnavailable error={archiveResult.error} />;
+  }
+
+  const archive = archiveResult.archive;
+  const manifest = archive.getManifest();
+  const entry = archive.getEntry(id);
+
+  if (!entry) {
+    notFound();
+  }
+
+  return (
+    <I18nProvider defaultLocale={manifest.language}>
+    <main className="min-h-screen bg-page text-ink">
+      <ArchiveNav
+        active="entries"
+        showCollections={archive.getCollections().length > 0}
+        title={manifest.title}
+      />
+      <article className="mx-auto max-w-[820px] px-5 py-6 lg:px-8 lg:py-8">
+        <Link
+          className={pillActionLink}
+          href="/entries"
+        >
+          <T k="common.entries" />
+        </Link>
+
+        <header className="border-b border-border-strong pb-12 pt-16">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] leading-[1.7] text-muted">
+            {entry.date && <span>{formatDate(entry.date)}</span>}
+            {entry.kind && <span>{entry.kind}</span>}
+            {entry.sourcePath && <span>{entry.sourcePath}</span>}
+          </div>
+          <h1 className="mt-6 font-serif text-[clamp(4rem,8vw,7rem)] font-semibold leading-[0.92] tracking-[-0.04em]">
+            {entry.title}
+          </h1>
+        </header>
+
+        <div
+          className="entry-body py-12 text-[18px] leading-[1.75] text-prose"
+          dangerouslySetInnerHTML={{ __html: entry.body.html }}
+        />
+      </article>
+      <ArchivePageFooter title={manifest.title} />
+    </main>
+    </I18nProvider>
+  );
+}
+
+function formatDate(date: string) {
+  const parsed = new Date(`${date}T00:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return date;
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(parsed);
+}
