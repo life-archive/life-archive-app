@@ -67,7 +67,7 @@ export default async function Home() {
   const profileFile = archive.resolveFile("profile.png");
   const heroImage = heroFile ? fileSrc(heroFile) : rendererDefaults.fallbackImages.hero;
   const profileImage = profileFile ? fileSrc(profileFile) : undefined;
-  const collections = getDisplayCollections(data, files, "board");
+  const collections = getDisplayCollections(data, files, ["board", "link"]);
   const albums = getDisplayAlbums(data.albums);
   const archiveSize = getArchiveSize(data);
   const yearSpan = getYearSpan(data.entries);
@@ -213,8 +213,10 @@ export default async function Home() {
         {collections.slice(0, 3).map((collection) => (
           <a
             className={featureMediaCard}
-            href={`/collections/${collection.id}`}
+            href={collection.href}
             key={collection.id}
+            rel={collection.external ? "noreferrer" : undefined}
+            target={collection.external ? "_blank" : undefined}
           >
             <Image
               alt=""
@@ -594,10 +596,14 @@ function byteLength(value: string) {
 function getDisplayCollections(
   data: LafArchiveJSON,
   files: LafFileAsset[],
-  kind?: "board" | "album" | string
+  kind?: "board" | "album" | "link" | string | string[]
 ) {
   const source = kind
-    ? data.collections.filter((collection) => collection.kind === kind)
+    ? data.collections.filter((collection) =>
+        Array.isArray(kind)
+          ? kind.includes(collection.kind ?? "")
+          : collection.kind === kind,
+      )
     : data.collections;
 
   const featured = source.filter((collection) => collection.featured);
@@ -614,6 +620,10 @@ function getDisplayCollections(
     const coverFile = filename
       ? files.find((file) => matchesFileReference(file, filename))
       : undefined;
+    const linkTarget =
+      collection.kind === "link"
+        ? resolveCollectionLink(collection)
+        : undefined;
 
     return {
       id: collection.id,
@@ -632,8 +642,78 @@ function getDisplayCollections(
         ? fileSrc(coverFile)
         : rendererDefaults.fallbackImages.collection,
       tags: collection.tags,
+      href: linkTarget?.href ?? `/collections/${collection.id}`,
+      external: linkTarget?.external,
     };
   });
+}
+
+function resolveCollectionLink(collection: LafArchiveJSON["collections"][number]) {
+  const raw =
+    stringMetadata(collection, "href") ??
+    stringMetadata(collection, "link") ??
+    stringMetadata(collection, "url");
+
+  if (!raw) {
+    return undefined;
+  }
+
+  return resolveLinkTarget(raw);
+}
+
+function resolveLinkTarget(raw: string) {
+  const trimmed = raw.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return {
+      external: true,
+      href: trimmed,
+    };
+  }
+
+  if (trimmed.startsWith("/")) {
+    return {
+      external: false,
+      href: trimmed,
+    };
+  }
+
+  const prefixed = trimmed.match(/^(entry|album|collection):(.+)$/);
+
+  if (prefixed) {
+    const [, type, id] = prefixed;
+    const route = type === "entry" ? "entries" : `${type}s`;
+
+    return {
+      external: false,
+      href: `/${route}/${encodeURIComponent(id.trim())}`,
+    };
+  }
+
+  const normalized = trimmed.replace(/\.md$/i, "");
+
+  if (/^(entries|albums|collections)\//.test(normalized)) {
+    return {
+      external: false,
+      href: `/${normalized
+        .split("/")
+        .map(encodeURIComponent)
+        .join("/")}`,
+    };
+  }
+
+  return undefined;
+}
+
+function stringMetadata(
+  collection: LafArchiveJSON["collections"][number],
+  key: string,
+) {
+  const value = collection.metadata[key];
+
+  return typeof value === "string" && value.trim().length > 0
+    ? value
+    : undefined;
 }
 
 function markdownExcerpt(markdown: string, fallback: string) {

@@ -25,6 +25,7 @@ type DisplayCollection = {
   tags: string[];
   kind?: string;
   href?: string;
+  external?: boolean;
 };
 
 export async function generateMetadata() {
@@ -165,6 +166,19 @@ function CollectionCard({
     return <div className={className}>{content}</div>;
   }
 
+  if (collection.external) {
+    return (
+      <a
+        className={`${className} cursor-pointer`}
+        href={collection.href}
+        rel="noreferrer"
+        target="_blank"
+      >
+        {content}
+      </a>
+    );
+  }
+
   return (
     <NextLink className={`${className} cursor-pointer`} href={collection.href}>
       {content}
@@ -177,7 +191,7 @@ function getDisplayCollections(
   files: LafFileAsset[],
 ): DisplayCollection[] {
   return collections
-    .filter((collection) => collection.kind === "board")
+    .filter((collection) => collection.kind === "board" || collection.kind === "link")
     .map((collection) => {
       const coverRef =
         collection.cover ??
@@ -196,6 +210,11 @@ function getDisplayCollections(
           collection.people.length +
           collection.places.length;
 
+      const linkTarget =
+        collection.kind === "link"
+          ? resolveCollectionLink(collection)
+          : undefined;
+
       return {
         id: collection.id,
         title: collection.title,
@@ -209,9 +228,75 @@ function getDisplayCollections(
           : rendererDefaults.fallbackImages.collection,
         tags: collection.tags,
         kind: collection.kind,
-        href: `/collections/${collection.id}`,
+        href: linkTarget?.href ?? `/collections/${collection.id}`,
+        external: linkTarget?.external,
       };
     });
+}
+
+function resolveCollectionLink(collection: LafCollection) {
+  const raw =
+    stringMetadata(collection, "href") ??
+    stringMetadata(collection, "link") ??
+    stringMetadata(collection, "url");
+
+  if (!raw) {
+    return undefined;
+  }
+
+  return resolveLinkTarget(raw);
+}
+
+function resolveLinkTarget(raw: string) {
+  const trimmed = raw.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return {
+      external: true,
+      href: trimmed,
+    };
+  }
+
+  if (trimmed.startsWith("/")) {
+    return {
+      external: false,
+      href: trimmed,
+    };
+  }
+
+  const prefixed = trimmed.match(/^(entry|album|collection):(.+)$/);
+
+  if (prefixed) {
+    const [, type, id] = prefixed;
+    const route = type === "entry" ? "entries" : `${type}s`;
+
+    return {
+      external: false,
+      href: `/${route}/${encodeURIComponent(id.trim())}`,
+    };
+  }
+
+  const normalized = trimmed.replace(/\.md$/i, "");
+
+  if (/^(entries|albums|collections)\//.test(normalized)) {
+    return {
+      external: false,
+      href: `/${normalized
+        .split("/")
+        .map(encodeURIComponent)
+        .join("/")}`,
+    };
+  }
+
+  return undefined;
+}
+
+function stringMetadata(collection: LafCollection, key: string) {
+  const value = collection.metadata[key];
+
+  return typeof value === "string" && value.trim().length > 0
+    ? value
+    : undefined;
 }
 
 function firstMarkdownLine(markdown: string) {
