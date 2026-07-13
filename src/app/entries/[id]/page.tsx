@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { tryOpenArchive, type LafFileAsset } from "@/lib/life";
 
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../../archiveSelection";
 import { ArchiveUnavailable } from "../../ArchiveUnavailable";
 import { ArchivePageFooter } from "../../ArchivePageFooter";
 import { ArchiveNav } from "../../ArchiveNav";
@@ -22,7 +23,7 @@ const imageExtensions = new Set(["gif", "jpg", "jpeg", "png", "svg", "webp"]);
 
 export async function generateMetadata({ params }: EntryPageProps) {
   const { id } = await params;
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -46,7 +47,7 @@ export async function generateMetadata({ params }: EntryPageProps) {
       canonical: `/entries/${encodeURIComponent(id)}`,
       description: entry ? firstLine(entry) : undefined,
       image: previewFile ? fileSrc(previewFile) : undefined,
-      siteUrl: manifestSiteUrl(manifest),
+      siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
     },
   );
 }
@@ -67,7 +68,7 @@ export async function generateStaticParams() {
 
 export default async function EntryPage({ params }: EntryPageProps) {
   const { id } = await params;
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;

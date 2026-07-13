@@ -1,16 +1,18 @@
 import type { MetadataRoute } from "next";
 
-import { tryOpenArchive } from "@/lib/life";
-
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "./archiveSelection";
 import { manifestSiteUrl } from "./pageMetadata";
 
 export const dynamic = "force-dynamic";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const archiveResult = await tryOpenArchive();
-  const siteUrl = archiveResult.ok
-    ? siteUrlFromManifest(archiveResult.archive.getManifest())
-    : siteUrlFromEnvironment() ?? "http://localhost:3000";
+  const archiveResult = await tryOpenSiteArchive();
+  const siteUrl =
+    (await getSiteUrlFromRequest(
+      archiveResult.ok
+        ? siteUrlFromManifest(archiveResult.archive.getManifest())
+        : siteUrlFromEnvironment() ?? "http://localhost:3000",
+    )) ?? "http://localhost:3000";
 
   return {
     rules: {

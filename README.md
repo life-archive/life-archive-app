@@ -282,6 +282,54 @@ By default, runtime cache files are written under:
 
 If the deployment target has a read-only project filesystem, set `systemPath` in `src/defaults.ts` to a writable location such as a mounted volume or `/tmp/life-archive-app`.
 
+### Single Archive Mode
+
+By default, the app serves one archive configured by `archivePath` in `src/defaults.ts`:
+
+```ts
+archivePath: "content/demo.life",
+archiveRouting: {
+  mode: "single",
+  hosts: {},
+}
+```
+
+This mode is best for most deployments. The app has one content source, routes such as `/entries/...` always refer to that archive, and static generation can still work where Next.js can prerender pages from the default archive.
+
+### Multi-Host Archive Mode
+
+One Next.js server can also serve different `.life` folders from different hostnames or subdomains.
+
+Example:
+
+```txt
+mydomain.com              -> content/john.life
+www.mydomain.com          -> content/john.life
+astro.mydomain.com      -> content/astro.life
+projects.mydomain.com     -> content/projects.life
+```
+
+Configure this in `src/defaults.ts`:
+
+```ts
+archivePath: "content/madhan.life",
+archiveRouting: {
+  mode: "multi-host",
+  hosts: {
+    "mydomain.com": "content/john.life",
+    "www.mydomain.com": "content/john.life",
+    "astro.mydomain.com": "content/astro.life",
+    "projects.mydomain.com": "content/projects.life",
+  },
+}
+```
+
+In multi-host mode, the renderer selects the archive from the request `Host` or `X-Forwarded-Host` header. Page rendering, metadata, sitemap, robots, favicon, file routes, album routes, and thumbnail generation all use the selected archive.
+
+If a hostname is not listed in `archiveRouting.hosts`, the app falls back to `archivePath`.
+
+Multi-host mode should be deployed as a server/runtime app. The same URL path, such as `/entries/example`, can point to different archive content depending on the hostname, so static output is not globally unique across hosts.
+
 ## Search Indexing
 
 Archive pages are rendered as server HTML and are indexable by search engines.

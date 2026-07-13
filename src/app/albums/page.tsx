@@ -1,10 +1,10 @@
 import {
-  tryOpenArchive,
   type LafAlbum,
   type LafAlbumFile,
 } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../archiveSelection";
 import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
@@ -19,7 +19,7 @@ import { AlbumCard, type DisplayAlbum } from "./AlbumCard";
 const thumbnailExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 
 export async function generateMetadata() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -31,12 +31,12 @@ export async function generateMetadata() {
   return archivePageMetadata(manifest.title, "Albums", undefined, {
     canonical: "/albums",
     description: `Browse ${archive.getAlbums().length.toLocaleString()} photo albums from ${manifest.title}.`,
-    siteUrl: manifestSiteUrl(manifest),
+    siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
   });
 }
 
 export default async function AlbumsPage() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;

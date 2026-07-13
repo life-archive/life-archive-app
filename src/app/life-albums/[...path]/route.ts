@@ -4,8 +4,7 @@ import { readFile } from "node:fs/promises";
 import { rendererDefaults } from "@/defaults";
 import { resolveArchivePath, resolveWithin } from "@/lib/life/paths";
 import { redirectToImageFallback } from "@/app/imageFallback";
-
-const albumsRoot = resolveWithin(resolveArchivePath(), "albums");
+import { getArchivePathForRequest } from "@/app/archiveSelection";
 
 const contentTypes: Record<string, string> = {
   gif: "image/gif",
@@ -22,6 +21,8 @@ export async function GET(
 ) {
   const params = await context.params;
   const requestedPath = params.path.join("/");
+  const archivePath = getArchivePathForRequest(request);
+  const albumsRoot = resolveWithin(resolveArchivePath(archivePath), "albums");
 
   try {
     const filePath = resolveWithin(albumsRoot, requestedPath);

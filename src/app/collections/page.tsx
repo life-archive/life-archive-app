@@ -3,12 +3,12 @@ import NextLink from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import {
-  tryOpenArchive,
   type LafCollection,
   type LafFileAsset,
 } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../archiveSelection";
 import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
@@ -33,7 +33,7 @@ type DisplayCollection = {
 };
 
 export async function generateMetadata() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -45,12 +45,12 @@ export async function generateMetadata() {
   return archivePageMetadata(manifest.title, "Collections", undefined, {
     canonical: "/collections",
     description: `Browse ${archive.getCollections().length.toLocaleString()} curated collections from ${manifest.title}.`,
-    siteUrl: manifestSiteUrl(manifest),
+    siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
   });
 }
 
 export default async function CollectionsPage() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;

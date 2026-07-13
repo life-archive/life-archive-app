@@ -1,5 +1,4 @@
-import { tryOpenArchive } from "@/lib/life";
-
+import { tryOpenSiteArchive } from "../archiveSelection";
 import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
@@ -7,7 +6,7 @@ import { I18nProvider, T } from "../i18n/I18nProvider";
 import { archivePageMetadata, archiveUnavailableMetadata } from "../pageMetadata";
 
 export async function generateMetadata() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -17,7 +16,7 @@ export async function generateMetadata() {
 }
 
 export default async function AboutPage() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;

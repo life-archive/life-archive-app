@@ -14,9 +14,9 @@ import {
   type LafEntry,
   type LafFileAsset,
 } from "@/lib/life";
-import { tryOpenArchive } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "./archiveSelection";
 import { ArchiveNav } from "./ArchiveNav";
 import { ArchiveUnavailable } from "./ArchiveUnavailable";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -40,7 +40,7 @@ import {
 const thumbnailExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 
 export async function generateMetadata() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -59,13 +59,13 @@ export async function generateMetadata() {
   return archiveHomeMetadata(manifest.title, {
     description: data.readme ? markdownExcerpt(data.readme.markdown, "") : undefined,
     image: heroFile ? fileSrc(heroFile) : rendererDefaults.fallbackImages.hero,
-    siteUrl: manifestSiteUrl(manifest),
+    siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
   });
 }
 
 export default async function Home() {
   const renderStartedAt = performance.now();
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;

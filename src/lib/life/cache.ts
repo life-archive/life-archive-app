@@ -15,6 +15,7 @@ const thumbnailInputExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 type ThumbnailSource = Pick<LafAlbumFile, "extension" | "relativePath">;
 
 export type ThumbnailOptions = {
+  archivePath?: string;
   width?: number;
 };
 
@@ -31,7 +32,7 @@ export async function getAlbumThumbnail(
     throw new Error(`Unsupported thumbnail input type: ${file.extension}`);
   }
 
-  const archiveRoot = resolveDefaultArchiveRoot();
+  const archiveRoot = resolveDefaultArchiveRoot(options.archivePath);
   const albumsRoot = resolveWithin(archiveRoot, "albums");
   const cacheRoot = resolveWithin(
     resolveSystemPath(),
@@ -88,8 +89,10 @@ export function normalizeThumbnailWidth(width: unknown): number {
   return Math.min(2048, Math.max(320, Math.round(parsed)));
 }
 
-function resolveDefaultArchiveRoot() {
-  return resolveArchivePath(rendererDefaults.archivePath);
+function resolveDefaultArchiveRoot(
+  archivePath: string = rendererDefaults.archivePath,
+) {
+  return resolveArchivePath(archivePath);
 }
 
 function sha256(value: string) {

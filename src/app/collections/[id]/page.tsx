@@ -11,6 +11,7 @@ import {
 } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../../archiveSelection";
 import { ArchiveUnavailable } from "../../ArchiveUnavailable";
 import { ArchivePageFooter } from "../../ArchivePageFooter";
 import { ArchiveNav } from "../../ArchiveNav";
@@ -30,7 +31,7 @@ type CollectionPageProps = {
 
 export async function generateMetadata({ params }: CollectionPageProps) {
   const { id } = await params;
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -53,7 +54,7 @@ export async function generateMetadata({ params }: CollectionPageProps) {
         ? collection.description || firstMarkdownLine(collection.body.markdown)
         : undefined,
       image: coverFile ? fileSrc(coverFile) : undefined,
-      siteUrl: manifestSiteUrl(manifest),
+      siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
     },
   );
 }
@@ -77,7 +78,7 @@ export async function generateStaticParams() {
 
 export default async function CollectionPage({ params }: CollectionPageProps) {
   const { id } = await params;
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;

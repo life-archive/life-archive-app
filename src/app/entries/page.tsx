@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { tryOpenArchive, type LafEntry } from "@/lib/life";
+import { type LafEntry } from "@/lib/life";
 
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../archiveSelection";
 import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
@@ -19,7 +20,7 @@ type EntryGroup = {
 };
 
 export async function generateMetadata() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -31,12 +32,12 @@ export async function generateMetadata() {
   return archivePageMetadata(manifest.title, "Entries", undefined, {
     canonical: "/entries",
     description: `Browse ${archive.getEntries().length.toLocaleString()} entries from ${manifest.title}.`,
-    siteUrl: manifestSiteUrl(manifest),
+    siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
   });
 }
 
 export default async function EntriesPage() {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;

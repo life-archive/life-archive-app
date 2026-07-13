@@ -1,5 +1,9 @@
 export const rendererDefaults = {
   archivePath: "content/demo.life",
+  archiveRouting: {
+    mode: "single",
+    hosts: {},
+  },
   systemPath: ".laf-system",
   defaultLocale: "en",
   defaultTheme: "gallery",

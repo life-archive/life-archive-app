@@ -1,13 +1,12 @@
 import type { MetadataRoute } from "next";
 
-import { tryOpenArchive } from "@/lib/life";
-
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "./archiveSelection";
 import { manifestSiteUrl } from "./pageMetadata";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return [];
@@ -15,7 +14,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
-  const siteUrl = siteUrlFromManifest(manifest);
+  const siteUrl =
+    (await getSiteUrlFromRequest(siteUrlFromManifest(manifest))) ??
+    "http://localhost:3000";
   const staticRoutes = ["/", "/entries", "/albums", "/collections"];
   const entryRoutes = archive
     .getEntries()

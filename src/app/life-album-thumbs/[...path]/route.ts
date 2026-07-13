@@ -6,6 +6,7 @@ import {
 } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 import { redirectToImageFallback } from "@/app/imageFallback";
+import { getArchivePathForRequest } from "@/app/archiveSelection";
 
 const thumbnailExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 
@@ -17,6 +18,7 @@ export async function GET(
   const [widthSegment, ...filePathSegments] = params.path;
   const requestedPath = filePathSegments.join("/");
   const width = normalizeThumbnailWidth(widthSegment);
+  const archivePath = getArchivePathForRequest(request);
   const filename = filePathSegments.at(-1) ?? "";
   const extension = filename.split(".").at(-1)?.toLowerCase() ?? "";
 
@@ -30,7 +32,7 @@ export async function GET(
         extension,
         relativePath: requestedPath,
       },
-      { width },
+      { archivePath, width },
     );
     const body = await readFile(thumbnail.path);
 

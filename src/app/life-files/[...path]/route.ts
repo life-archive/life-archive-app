@@ -7,8 +7,7 @@ import {
   redirectToImageFallback,
   requestAcceptsImage,
 } from "@/app/imageFallback";
-
-const filesRoot = resolveWithin(resolveArchivePath(), "files");
+import { getArchivePathForRequest } from "@/app/archiveSelection";
 
 const contentTypes: Record<string, string> = {
   gif: "image/gif",
@@ -25,6 +24,8 @@ export async function GET(
 ) {
   const params = await context.params;
   const requestedPath = params.path.join("/");
+  const archivePath = getArchivePathForRequest(request);
+  const filesRoot = resolveWithin(resolveArchivePath(archivePath), "files");
 
   try {
     const filePath = resolveWithin(filesRoot, requestedPath);

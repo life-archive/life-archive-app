@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { tryOpenArchive, type LafAlbumFile } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 
+import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../../archiveSelection";
 import { ArchiveUnavailable } from "../../ArchiveUnavailable";
 import { ArchivePageFooter } from "../../ArchivePageFooter";
 import { ArchiveNav } from "../../ArchiveNav";
@@ -25,7 +26,7 @@ type AlbumPageProps = {
 
 export async function generateMetadata({ params }: AlbumPageProps) {
   const { id } = await params;
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return archiveUnavailableMetadata();
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: AlbumPageProps) {
         ? `Browse ${album.files.filter(isImageFile).length.toLocaleString()} photos from the ${album.title} album in ${manifest.title}.`
         : undefined,
       image: coverFile ? albumPreviewSrc(coverFile, 1600) : undefined,
-      siteUrl: manifestSiteUrl(manifest),
+      siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
     },
   );
 }
@@ -70,7 +71,7 @@ export async function generateStaticParams() {
 
 export default async function AlbumPage({ params }: AlbumPageProps) {
   const { id } = await params;
-  const archiveResult = await tryOpenArchive();
+  const archiveResult = await tryOpenSiteArchive();
 
   if (!archiveResult.ok) {
     return <ArchiveUnavailable error={archiveResult.error} />;
