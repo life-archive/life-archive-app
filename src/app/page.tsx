@@ -75,7 +75,11 @@ export default async function Home() {
     collections.length > 0 || entries.length > 0 || albums.length > 0;
   const footerLinks = getFooterLinks(data.manifest);
   const footerEmail = manifestString(data.manifest, "email");
-  const renderTimeMs = Math.round(performance.now() - renderStartedAt);
+  const totalRenderTimeMs = Math.round(performance.now() - renderStartedAt);
+  const pageRenderTimeMs = Math.max(
+    0,
+    totalRenderTimeMs - archiveResult.timing.durationMs,
+  );
 
   const heroMetadata = [
     entries.length > 0
@@ -436,7 +440,11 @@ export default async function Home() {
             <p>Format: {data.manifest.format}</p>
             <p><T k="footer.archiveSize" />: {formatBytes(archiveSize)}</p>
             <p><T k="footer.archiveLanguage" />: {data.manifest.language ?? "en-US"}</p>
-            <p>Render time: {renderTimeMs.toLocaleString()} ms</p>
+            <p>
+              Perf: archive {archiveResult.timing.durationMs.toLocaleString()} ms,
+              page {pageRenderTimeMs.toLocaleString()} ms, cache{" "}
+              {archiveResult.timing.cache}
+            </p>
           </FooterGroup>
 
           <FooterGroup title={<T k="theme.theme" />}>

@@ -15,12 +15,18 @@ import { resolveArchivePath } from "./paths";
 export type ArchiveLoadResult =
   | {
       archive: LifeArchive;
+      timing: ArchiveLoadTiming;
       ok: true;
     }
   | {
       error: ArchiveContentError;
       ok: false;
     };
+
+export type ArchiveLoadTiming = {
+  cache: "hit" | "miss";
+  durationMs: number;
+};
 
 type ArchiveCacheEntry = {
   archive: LifeArchive;
@@ -34,8 +40,11 @@ export async function tryOpenArchive(
   archivePath?: string,
 ): Promise<ArchiveLoadResult> {
   try {
+    const result = await openCachedArchive(archivePath);
+
     return {
-      archive: await openCachedArchive(archivePath),
+      archive: result.archive,
+      timing: result.timing,
       ok: true,
     };
   } catch (error) {
@@ -50,13 +59,23 @@ export async function tryOpenArchive(
   }
 }
 
-async function openCachedArchive(archivePath?: string): Promise<LifeArchive> {
+async function openCachedArchive(archivePath?: string): Promise<{
+  archive: LifeArchive;
+  timing: ArchiveLoadTiming;
+}> {
+  const startedAt = performance.now();
   const absoluteArchivePath = resolveArchivePath(archivePath);
   const signature = await getArchiveSignature(absoluteArchivePath);
   const cached = archiveCache.get(absoluteArchivePath);
 
   if (cached?.signature === signature) {
-    return cached.archive;
+    return {
+      archive: cached.archive,
+      timing: {
+        cache: "hit",
+        durationMs: Math.round(performance.now() - startedAt),
+      },
+    };
   }
 
   const pending = pendingArchiveLoads.get(absoluteArchivePath);
@@ -65,7 +84,13 @@ async function openCachedArchive(archivePath?: string): Promise<LifeArchive> {
     const pendingEntry = await pending;
 
     if (pendingEntry.signature === signature) {
-      return pendingEntry.archive;
+      return {
+        archive: pendingEntry.archive,
+        timing: {
+          cache: "miss",
+          durationMs: Math.round(performance.now() - startedAt),
+        },
+      };
     }
   }
 
@@ -84,7 +109,13 @@ async function openCachedArchive(archivePath?: string): Promise<LifeArchive> {
   pendingArchiveLoads.set(absoluteArchivePath, load);
 
   try {
-    return (await load).archive;
+    return {
+      archive: (await load).archive,
+      timing: {
+        cache: "miss",
+        durationMs: Math.round(performance.now() - startedAt),
+      },
+    };
   } finally {
     pendingArchiveLoads.delete(absoluteArchivePath);
   }
