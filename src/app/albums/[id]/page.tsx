@@ -11,6 +11,7 @@ import { I18nProvider, T } from "../../i18n/I18nProvider";
 import {
   archivePageMetadata,
   archiveUnavailableMetadata,
+  manifestSiteUrl,
 } from "../../pageMetadata";
 import { AlbumPhotoGrid } from "./AlbumPhotoGrid";
 import { AlbumViewSwitch } from "./AlbumViewSwitch";
@@ -33,11 +34,23 @@ export async function generateMetadata({ params }: AlbumPageProps) {
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
   const album = archive.getAlbum(id);
+  const coverFile =
+    album?.cover && isImageFile(album.cover)
+      ? album.cover
+      : album?.files.find(isImageFile);
 
   return archivePageMetadata(
     manifest.title,
     album?.title ?? "Album not found",
     "Album",
+    {
+      canonical: `/albums/${encodeURIComponent(id)}`,
+      description: album
+        ? `Browse ${album.files.filter(isImageFile).length.toLocaleString()} photos from the ${album.title} album in ${manifest.title}.`
+        : undefined,
+      image: coverFile ? albumPreviewSrc(coverFile, 1600) : undefined,
+      siteUrl: manifestSiteUrl(manifest),
+    },
   );
 }
 
@@ -73,7 +86,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
 
   const photos = album.files.filter(isImageFile).map((file) => ({
     id: file.id,
-    title: file.filename,
+    title: `${album.title} photo: ${humanizeFilename(file.filename)}`,
     src: albumFileSrc(file),
     thumbSrc: albumPreviewSrc(file, 960),
     width: file.width,
@@ -98,7 +111,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
       />
       <header className="relative min-h-[520px] overflow-hidden bg-photo-shell text-white">
         <Image
-          alt=""
+          alt={`${album.title} album cover`}
           className="object-cover opacity-78"
           fill
           priority
@@ -182,4 +195,12 @@ function formatBytes(bytes: number) {
   }
 
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function humanizeFilename(filename: string) {
+  return filename
+    .replace(/\.[^.]+$/, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }

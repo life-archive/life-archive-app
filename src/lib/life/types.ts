@@ -72,6 +72,7 @@ export type LafCollection = LafBaseEntity & {
   title: string;
   description?: string;
   layout?: string;
+  pos?: number;
   featured: boolean;
   items: string[];
   entries: string[];
@@ -79,8 +80,7 @@ export type LafCollection = LafBaseEntity & {
   places: string[];
   files: string[];
   tags: string[];
-
-    // Optional explicit cover image
+  // Optional explicit cover image
   cover?: string;
 };
 

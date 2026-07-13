@@ -1,3 +1,5 @@
+import { rendererDefaults } from "@/defaults";
+
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { T } from "./i18n/I18nProvider";
@@ -8,10 +10,29 @@ export function ArchivePageFooter({ title }: { title: string }) {
       <div className="border-t border-border-strong pt-6">
         <div>
           <p>
-            <T k="footer.pagePart" values={{ title }} />
+            <a
+              className="hover:text-ink"
+              href={rendererDefaults.links.project}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <T k="footer.pagePart" values={{ title }} />
+            </a>
           </p>
           <p>
-            <T k="footer.published" />
+            <a
+              className="hover:text-ink"
+              href={rendererDefaults.links.project}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <T k="footer.published" />
+            </a>
+          </p>
+          <p>
+            <a className="hover:text-ink" href="/sitemap.xml">
+              Sitemap
+            </a>
           </p>
         </div>
         <div className="mt-5 flex flex-wrap gap-x-8 gap-y-5">

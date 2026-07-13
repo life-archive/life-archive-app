@@ -17,7 +17,7 @@ export function AlbumCard({ album }: { album: DisplayAlbum }) {
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-media">
         <Image
-          alt={album.title}
+          alt={`${album.title} album cover`}
           className="object-cover transition duration-500 group-hover:scale-105"
           fill
           sizes="(min-width:1280px) 25vw, (min-width:768px) 33vw, 50vw"

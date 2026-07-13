@@ -7,7 +7,11 @@ import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
 import { I18nProvider, T } from "../i18n/I18nProvider";
-import { archivePageMetadata, archiveUnavailableMetadata } from "../pageMetadata";
+import {
+  archivePageMetadata,
+  archiveUnavailableMetadata,
+  manifestSiteUrl,
+} from "../pageMetadata";
 
 type EntryGroup = {
   year: string;
@@ -21,7 +25,14 @@ export async function generateMetadata() {
     return archiveUnavailableMetadata();
   }
 
-  return archivePageMetadata(archiveResult.archive.getManifest().title, "Entries");
+  const archive = archiveResult.archive;
+  const manifest = archive.getManifest();
+
+  return archivePageMetadata(manifest.title, "Entries", undefined, {
+    canonical: "/entries",
+    description: `Browse ${archive.getEntries().length.toLocaleString()} entries from ${manifest.title}.`,
+    siteUrl: manifestSiteUrl(manifest),
+  });
 }
 
 export default async function EntriesPage() {

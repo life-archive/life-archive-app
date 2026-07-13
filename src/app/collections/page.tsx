@@ -14,7 +14,11 @@ import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
 import { featureMediaCard, overlayChip } from "../design";
 import { I18nProvider, T } from "../i18n/I18nProvider";
-import { archivePageMetadata, archiveUnavailableMetadata } from "../pageMetadata";
+import {
+  archivePageMetadata,
+  archiveUnavailableMetadata,
+  manifestSiteUrl,
+} from "../pageMetadata";
 
 type DisplayCollection = {
   id: string;
@@ -35,10 +39,14 @@ export async function generateMetadata() {
     return archiveUnavailableMetadata();
   }
 
-  return archivePageMetadata(
-    archiveResult.archive.getManifest().title,
-    "Collections",
-  );
+  const archive = archiveResult.archive;
+  const manifest = archive.getManifest();
+
+  return archivePageMetadata(manifest.title, "Collections", undefined, {
+    canonical: "/collections",
+    description: `Browse ${archive.getCollections().length.toLocaleString()} curated collections from ${manifest.title}.`,
+    siteUrl: manifestSiteUrl(manifest),
+  });
 }
 
 export default async function CollectionsPage() {
@@ -106,7 +114,7 @@ function CollectionCard({
   const content = (
     <>
       <Image
-        alt=""
+        alt={`${collection.title} collection cover`}
         className="object-cover opacity-90 transition duration-500 group-hover:scale-105"
         fill
         sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"

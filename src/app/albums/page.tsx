@@ -9,7 +9,11 @@ import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
 import { I18nProvider, T } from "../i18n/I18nProvider";
-import { archivePageMetadata, archiveUnavailableMetadata } from "../pageMetadata";
+import {
+  archivePageMetadata,
+  archiveUnavailableMetadata,
+  manifestSiteUrl,
+} from "../pageMetadata";
 import { AlbumCard, type DisplayAlbum } from "./AlbumCard";
 
 const thumbnailExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
@@ -21,7 +25,14 @@ export async function generateMetadata() {
     return archiveUnavailableMetadata();
   }
 
-  return archivePageMetadata(archiveResult.archive.getManifest().title, "Albums");
+  const archive = archiveResult.archive;
+  const manifest = archive.getManifest();
+
+  return archivePageMetadata(manifest.title, "Albums", undefined, {
+    canonical: "/albums",
+    description: `Browse ${archive.getAlbums().length.toLocaleString()} photo albums from ${manifest.title}.`,
+    siteUrl: manifestSiteUrl(manifest),
+  });
 }
 
 export default async function AlbumsPage() {

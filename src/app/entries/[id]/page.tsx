@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { tryOpenArchive } from "@/lib/life";
+import { tryOpenArchive, type LafFileAsset } from "@/lib/life";
 
 import { ArchiveUnavailable } from "../../ArchiveUnavailable";
 import { ArchivePageFooter } from "../../ArchivePageFooter";
@@ -11,11 +11,14 @@ import { I18nProvider, T } from "../../i18n/I18nProvider";
 import {
   archivePageMetadata,
   archiveUnavailableMetadata,
+  manifestSiteUrl,
 } from "../../pageMetadata";
 
 type EntryPageProps = {
   params: Promise<{ id: string }>;
 };
+
+const imageExtensions = new Set(["gif", "jpg", "jpeg", "png", "svg", "webp"]);
 
 export async function generateMetadata({ params }: EntryPageProps) {
   const { id } = await params;
@@ -28,11 +31,23 @@ export async function generateMetadata({ params }: EntryPageProps) {
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
   const entry = archive.getEntry(id);
+  const previewFile = entry
+    ? entry.files
+        .map((filename) => archive.resolveFile(filename))
+        .filter((file): file is LafFileAsset => Boolean(file))
+        .find((file) => imageExtensions.has(file.extension))
+    : undefined;
 
   return archivePageMetadata(
     manifest.title,
     entry?.title ?? "Entry not found",
     "Entry",
+    {
+      canonical: `/entries/${encodeURIComponent(id)}`,
+      description: entry ? firstLine(entry) : undefined,
+      image: previewFile ? fileSrc(previewFile) : undefined,
+      siteUrl: manifestSiteUrl(manifest),
+    },
   );
 }
 
@@ -116,4 +131,27 @@ function formatDate(date: string) {
     day: "numeric",
     year: "numeric",
   }).format(parsed);
+}
+
+function firstLine(entry: { body: { markdown: string } }) {
+  return (
+    entry.body.markdown
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith("#"))
+      .map((line) =>
+        line
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+          .replace(/[*_`>#-]/g, "")
+          .trim(),
+      )
+      .find(Boolean) ?? undefined
+  );
+}
+
+function fileSrc(file: LafFileAsset) {
+  return `/life-files/${file.relativePath
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/")}`;
 }

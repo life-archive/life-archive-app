@@ -388,6 +388,7 @@ function buildEntity(
     title: stringValue(frontmatter.title, id),
     description: optionalString(frontmatter.description),
     layout: optionalString(frontmatter.layout),
+    pos: optionalNumber(frontmatter.pos),
     featured: booleanValue(frontmatter.featured),
     items: stringArray(frontmatter.items),
     entries: [
@@ -542,6 +543,14 @@ function optionalString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function optionalNumber(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return undefined;
+  }
+
+  return value;
+}
+
 function booleanValue(value: unknown): boolean {
   return value === true;
 }
@@ -581,5 +590,30 @@ function compareCollectionEntities(
   a: LafCollection,
   b: LafCollection,
 ): number {
+  const posComparison = compareOptionalNumbers(a.pos, b.pos);
+
+  if (posComparison !== 0) {
+    return posComparison;
+  }
+
   return a.title.localeCompare(b.title);
+}
+
+function compareOptionalNumbers(
+  a: number | undefined,
+  b: number | undefined,
+): number {
+  if (a === undefined && b === undefined) {
+    return 0;
+  }
+
+  if (a === undefined) {
+    return 1;
+  }
+
+  if (b === undefined) {
+    return -1;
+  }
+
+  return a - b;
 }

@@ -31,7 +31,11 @@ import {
   sectionActionLink,
 } from "./design";
 import { I18nProvider, T } from "./i18n/I18nProvider";
-import { archiveHomeMetadata, archiveUnavailableMetadata } from "./pageMetadata";
+import {
+  archiveHomeMetadata,
+  archiveUnavailableMetadata,
+  manifestSiteUrl,
+} from "./pageMetadata";
 
 const thumbnailExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 
@@ -42,7 +46,21 @@ export async function generateMetadata() {
     return archiveUnavailableMetadata();
   }
 
-  return archiveHomeMetadata(archiveResult.archive.getManifest().title);
+  const archive = archiveResult.archive;
+  const manifest = archive.getManifest();
+  const data = archive.toJSON();
+  const heroFile = resolveFirstFile(archive, [
+    "hero.jpg",
+    "hero.jpeg",
+    "hero.png",
+    "hero.webp",
+  ]);
+
+  return archiveHomeMetadata(manifest.title, {
+    description: data.readme ? markdownExcerpt(data.readme.markdown, "") : undefined,
+    image: heroFile ? fileSrc(heroFile) : rendererDefaults.fallbackImages.hero,
+    siteUrl: manifestSiteUrl(manifest),
+  });
 }
 
 export default async function Home() {
@@ -121,7 +139,7 @@ export default async function Home() {
         <div className="mx-auto max-w-[1440px]">
           <div className="relative min-h-[460px] overflow-hidden rounded-[8px] bg-hero-fallback shadow-hero ring-1 ring-border">
             <Image
-              alt="A reflective traveler looking over a mountain valley"
+              alt={`${title} hero image`}
               className="object-cover"
               fill
               priority
@@ -137,7 +155,7 @@ export default async function Home() {
                   {profileImage && (
                     <div className="relative size-24 shrink-0 overflow-hidden rounded-full border border-white/30 bg-white/20 shadow-profile backdrop-blur-md sm:size-28">
                       <Image
-                        alt={title}
+                        alt={`${title} profile photo`}
                         className="object-cover"
                         fill
                         sizes="112px"
@@ -223,7 +241,7 @@ export default async function Home() {
             target={collection.external ? "_blank" : undefined}
           >
             <Image
-              alt=""
+              alt={`${collection.title} collection cover`}
               className="object-cover opacity-90 transition duration-500 group-hover:scale-105"
               fill
               sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
@@ -402,7 +420,7 @@ export default async function Home() {
 )}
 
       <footer className="border-t border-border bg-paper-warm px-5 py-8 text-ink lg:px-8">
-        <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.7fr_0.8fr]">
+        <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[1.2fr_0.8fr_0.7fr_0.8fr]">
           <section>
             <h2 className="font-serif text-[34px] font-semibold leading-[1.05] tracking-[-0.03em]">
               <T k="home.archiveOffer" />
@@ -410,10 +428,32 @@ export default async function Home() {
             <p className="mt-3 max-w-[360px] text-[17px] leading-[1.7] text-muted">
               <T k="home.archiveValue" />
             </p>
+            <p
+              className="mt-4 max-w-[620px] text-[11px] leading-5 text-faint"
+              id="archive-details"
+            >
+              <span>Format: {data.manifest.format}</span>
+              <span aria-hidden="true"> / </span>
+              <span><T k="footer.archiveSize" />: {formatBytes(archiveSize)}</span>
+              <span aria-hidden="true"> / </span>
+              <span><T k="footer.archiveLanguage" />: {data.manifest.language ?? "en-US"}</span>
+              <span aria-hidden="true"> / </span>
+              <a className="hover:text-ink" href="/sitemap.xml">
+                Sitemap
+              </a>
+              <span aria-hidden="true"> / </span>
+              <span>
+                {archiveResult.timing.durationMs.toLocaleString()} ms,{" "}
+                {pageRenderTimeMs.toLocaleString()} ms,{" "}
+                {archiveResult.timing.cache}
+              </span>
+            </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <a
                 className="inline-flex h-10 items-center rounded-[7px] border border-border-strong bg-glass-surface px-4 text-sm font-medium text-ink"
-                href="#"
+                href={rendererDefaults.links.project}
+                rel="noreferrer"
+                target="_blank"
               >
                 <T k="home.learnMore" />
               </a>
@@ -436,17 +476,6 @@ export default async function Home() {
             </FooterGroup>
           )}
 
-          <FooterGroup title={<T k="footer.details" />} id="archive-details">
-            <p>Format: {data.manifest.format}</p>
-            <p><T k="footer.archiveSize" />: {formatBytes(archiveSize)}</p>
-            <p><T k="footer.archiveLanguage" />: {data.manifest.language ?? "en-US"}</p>
-            <p>
-              Perf: archive {archiveResult.timing.durationMs.toLocaleString()} ms,
-              page {pageRenderTimeMs.toLocaleString()} ms, cache{" "}
-              {archiveResult.timing.cache}
-            </p>
-          </FooterGroup>
-
           <FooterGroup title={<T k="theme.theme" />}>
             <ThemeSwitcher />
           </FooterGroup>
@@ -456,7 +485,14 @@ export default async function Home() {
           </FooterGroup>
         </div>
         <div className="mx-auto mt-8 flex max-w-[1440px] flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-border pt-4 text-[13px] leading-[1.7] text-muted">
-          <span><T k="footer.builtWith" /></span>
+          <a
+            className="hover:text-ink"
+            href={rendererDefaults.links.project}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <T k="footer.builtWith" />
+          </a>
         </div>
       </footer>
     </main>

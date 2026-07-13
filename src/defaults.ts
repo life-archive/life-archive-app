@@ -1,5 +1,5 @@
 export const rendererDefaults = {
-  archivePath: "content/madhan.life",
+  archivePath: "content/demo.life",
   systemPath: ".laf-system",
   defaultLocale: "en",
   defaultTheme: "gallery",
@@ -14,6 +14,9 @@ export const rendererDefaults = {
   metadata: {
     defaultTitle: "Life Archive",
     description: "Reference renderer for Life Archive Format archives.",
+  },
+  links: {
+    project: "https://github.com/life-archive/life-archive-app",
   },
   cacheControl: {
     asset: "public, max-age=31536000, immutable",

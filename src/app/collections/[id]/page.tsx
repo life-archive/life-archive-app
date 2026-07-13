@@ -19,6 +19,7 @@ import { I18nProvider, T } from "../../i18n/I18nProvider";
 import {
   archivePageMetadata,
   archiveUnavailableMetadata,
+  manifestSiteUrl,
 } from "../../pageMetadata";
 
 const imageExtensions = new Set(["gif", "jpg", "jpeg", "png", "svg", "webp"]);
@@ -38,11 +39,22 @@ export async function generateMetadata({ params }: CollectionPageProps) {
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
   const collection = archive.getCollection(id);
+  const coverFile = collection
+    ? getCoverFile(collection, archive.getFiles())
+    : undefined;
 
   return archivePageMetadata(
     manifest.title,
     collection?.title ?? "Collection not found",
     "Collection",
+    {
+      canonical: `/collections/${encodeURIComponent(id)}`,
+      description: collection
+        ? collection.description || firstMarkdownLine(collection.body.markdown)
+        : undefined,
+      image: coverFile ? fileSrc(coverFile) : undefined,
+      siteUrl: manifestSiteUrl(manifest),
+    },
   );
 }
 
@@ -106,7 +118,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
       <header className="relative min-h-[520px] overflow-hidden bg-photo-shell text-white">
         <Image
-          alt=""
+          alt={`${collection.title} collection cover`}
           className="object-cover opacity-80"
           fill
           priority
@@ -228,7 +240,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                       key={file.id}
                     >
                       <Image
-                        alt={file.filename}
+                        alt={`${collection.title} file: ${file.filename}`}
                         className="object-cover opacity-95 transition duration-500 group-hover:scale-105"
                         fill
                         sizes="(min-width: 1280px) 25vw, 50vw"
