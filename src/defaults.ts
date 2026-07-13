@@ -14,6 +14,7 @@ export const rendererDefaults = {
   },
   home: {
     albumLimit: 20,
+    collectionLimit: 25,
   },
   metadata: {
     defaultTitle: "Life Archive",
@@ -23,7 +24,7 @@ export const rendererDefaults = {
     project: "https://github.com/life-archive/life-archive-app",
   },
   cacheControl: {
-    asset: "public, max-age=31536000, immutable",
+    asset: "public, no-cache",
     icon: "public, max-age=3600",
   },
 } as const;

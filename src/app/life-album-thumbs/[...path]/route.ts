@@ -1,12 +1,10 @@
-import { readFile } from "node:fs/promises";
-
 import {
   getAlbumThumbnail,
   normalizeThumbnailWidth,
 } from "@/lib/life";
-import { rendererDefaults } from "@/defaults";
 import { redirectToImageFallback } from "@/app/imageFallback";
 import { getArchivePathForRequest } from "@/app/archiveSelection";
+import { archiveAssetResponse } from "@/app/archiveAssetResponse";
 
 const thumbnailExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 
@@ -34,14 +32,12 @@ export async function GET(
       },
       { archivePath, width },
     );
-    const body = await readFile(thumbnail.path);
 
-    return new Response(body, {
-      headers: {
-        "Cache-Control": rendererDefaults.cacheControl.asset,
-        "Content-Type": thumbnail.contentType,
-      },
-    });
+    return await archiveAssetResponse(
+      request,
+      thumbnail.path,
+      thumbnail.contentType,
+    );
   } catch {
     return redirectToImageFallback(request);
   }

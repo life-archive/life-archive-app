@@ -7,6 +7,7 @@ import {
   HomeIcon,
   ImageIcon,
   Menu,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 
@@ -18,11 +19,18 @@ const navItems: Array<{
   labelKey: TranslationKey;
   key: ArchiveNavActive;
   icon: LucideIcon;
+  requiresAlbums?: boolean;
   requiresCollections?: boolean;
 }> = [
   { href: "/", labelKey: "nav.home", key: "home", icon: HomeIcon },
   { href: "/entries", labelKey: "nav.entries", key: "entries", icon: BookOpen },
-  { href: "/albums", labelKey: "nav.albums", key: "albums", icon: ImageIcon },
+  {
+    href: "/albums",
+    labelKey: "nav.albums",
+    key: "albums",
+    icon: ImageIcon,
+    requiresAlbums: true,
+  },
   {
     href: "/collections",
     labelKey: "nav.collections",
@@ -37,21 +45,26 @@ export type ArchiveNavActive =
   | "entries"
   | "albums"
   | "collections"
+  | "search"
   | "about";
 
 export function ArchiveNav({
   active,
+  showAlbums = false,
   showCollections = false,
   title,
 }: {
   active: ArchiveNavActive;
+  showAlbums?: boolean;
   showCollections?: boolean;
   title: string;
 }) {
   const { t } = useI18n();
   const brandName = title.split(" ")[0] || title;
   const visibleNavItems = navItems.filter(
-    (item) => !item.requiresCollections || showCollections,
+    (item) =>
+      (!item.requiresAlbums || showAlbums) &&
+      (!item.requiresCollections || showCollections),
   );
 
   return (
@@ -83,13 +96,37 @@ export function ArchiveNav({
               </NextLink>
             );
           })}
+          <NextLink
+            aria-label={t("nav.search")}
+            className={`grid size-9 place-items-center rounded-full transition ${
+              active === "search"
+                ? "bg-photo-shell text-white"
+                : "hover:bg-hover-soft hover:text-ink"
+            }`}
+            href="/search"
+            title={t("nav.search")}
+          >
+            <Search aria-hidden="true" size={16} strokeWidth={1.8} />
+          </NextLink>
         </nav>
-        <button
-          aria-label={t("nav.openMenu")}
-          className="grid size-10 place-items-center rounded-full border border-border-strong bg-glass-surface text-soft lg:hidden"
-        >
-          <Menu aria-hidden="true" size={20} strokeWidth={1.8} />
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <NextLink
+            aria-label={t("nav.search")}
+            className={`grid size-10 place-items-center rounded-full border border-border-strong bg-glass-surface transition ${
+              active === "search" ? "text-ink" : "text-soft"
+            }`}
+            href="/search"
+            title={t("nav.search")}
+          >
+            <Search aria-hidden="true" size={18} strokeWidth={1.8} />
+          </NextLink>
+          <button
+            aria-label={t("nav.openMenu")}
+            className="grid size-10 place-items-center rounded-full border border-border-strong bg-glass-surface text-soft"
+          >
+            <Menu aria-hidden="true" size={20} strokeWidth={1.8} />
+          </button>
+        </div>
       </div>
     </header>
   );

@@ -87,6 +87,7 @@ export default async function EntryPage({ params }: EntryPageProps) {
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="entries"
+        showAlbums={archive.getAlbums().length > 0}
         showCollections={archive.getCollections().length > 0}
         title={manifest.title}
       />

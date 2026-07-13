@@ -16,6 +16,7 @@ import { ArchiveUnavailable } from "../../ArchiveUnavailable";
 import { ArchivePageFooter } from "../../ArchivePageFooter";
 import { ArchiveNav } from "../../ArchiveNav";
 import { elevatedCardLink, pillActionLink } from "../../design";
+import { entryExcerpt } from "../../entryExcerpt";
 import { I18nProvider, T } from "../../i18n/I18nProvider";
 import {
   archivePageMetadata,
@@ -113,6 +114,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="collections"
+        showAlbums={archive.getAlbums().length > 0}
         showCollections={archive.getCollections().length > 0}
         title={manifest.title}
       />
@@ -207,7 +209,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                       </h3>
                       {entry.body.markdown && (
                         <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted">
-                          {firstMarkdownLine(entry.body.markdown)}
+                          {entryExcerpt(entry.body.markdown)}
                         </p>
                       )}
                       <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-ink">

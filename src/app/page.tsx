@@ -58,7 +58,9 @@ export async function generateMetadata() {
 
   return archiveHomeMetadata(manifest.title, {
     description: data.readme ? markdownExcerpt(data.readme.markdown, "") : undefined,
-    image: heroFile ? fileSrc(heroFile) : rendererDefaults.fallbackImages.hero,
+    image: heroFile
+      ? fileSrc(heroFile, manifest.title)
+      : rendererDefaults.fallbackImages.hero,
     siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
   });
 }
@@ -83,8 +85,10 @@ export default async function Home() {
     "hero.webp",
   ]);
   const profileFile = archive.resolveFile("profile.png");
-  const heroImage = heroFile ? fileSrc(heroFile) : rendererDefaults.fallbackImages.hero;
-  const profileImage = profileFile ? fileSrc(profileFile) : undefined;
+  const heroImage = heroFile
+    ? fileSrc(heroFile, title)
+    : rendererDefaults.fallbackImages.hero;
+  const profileImage = profileFile ? fileSrc(profileFile, title) : undefined;
   const collections = getDisplayCollections(data, files, ["board", "link"]);
   const albums = getDisplayAlbums(data.albums);
   const archiveSize = getArchiveSize(data);
@@ -131,6 +135,7 @@ export default async function Home() {
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="home"
+        showAlbums={data.albums.length > 0}
         showCollections={data.collections.length > 0}
         title={title}
       />
@@ -232,7 +237,7 @@ export default async function Home() {
     </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {collections.slice(0, 3).map((collection) => (
+        {collections.map((collection) => (
           <a
             className={featureMediaCard}
             href={collection.href}
@@ -653,43 +658,45 @@ function getDisplayCollections(
   const featured = source.filter((collection) => collection.featured);
   const collections = featured.length > 0 ? featured : source;
 
-  return collections.slice(0, 6).map((collection) => {
-    const coverRef =
-      collection.cover ??
-      collection.items.find((item) => item.startsWith("file:")) ??
-      (collection.files.length > 0 ? `file:${collection.files[0]}` : undefined);
+  return collections
+    .slice(0, rendererDefaults.home.collectionLimit)
+    .map((collection) => {
+      const coverRef =
+        collection.cover ??
+        collection.items.find((item) => item.startsWith("file:")) ??
+        (collection.files.length > 0 ? `file:${collection.files[0]}` : undefined);
 
-    const filename = coverRef?.replace(/^file:/, "");
+      const filename = coverRef?.replace(/^file:/, "");
 
-    const coverFile = filename
-      ? files.find((file) => matchesFileReference(file, filename))
-      : undefined;
-    const linkTarget =
-      collection.kind === "link"
-        ? resolveCollectionLink(collection)
+      const coverFile = filename
+        ? files.find((file) => matchesFileReference(file, filename))
         : undefined;
+      const linkTarget =
+        collection.kind === "link"
+          ? resolveCollectionLink(collection)
+          : undefined;
 
-    return {
-      id: collection.id,
-      title: collection.title,
-      description:
-        collection.description ||
-        markdownExcerpt(collection.body.markdown, "") ||
-        `${collection.entries.length} entries, ${collection.files.length} files, and ${collection.tags.length} tags.`,
-      count:
-        collection.items.length ||
-        collection.entries.length +
-          collection.files.length +
-          collection.people.length +
-          collection.places.length,
-      image: coverFile
-        ? fileSrc(coverFile)
-        : rendererDefaults.fallbackImages.collection,
-      tags: collection.tags,
-      href: linkTarget?.href ?? `/collections/${collection.id}`,
-      external: linkTarget?.external,
-    };
-  });
+      return {
+        id: collection.id,
+        title: collection.title,
+        description:
+          collection.description ||
+          markdownExcerpt(collection.body.markdown, "") ||
+          `${collection.entries.length} entries, ${collection.files.length} files, and ${collection.tags.length} tags.`,
+        count:
+          collection.items.length ||
+          collection.entries.length +
+            collection.files.length +
+            collection.people.length +
+            collection.places.length,
+        image: coverFile
+          ? fileSrc(coverFile)
+          : rendererDefaults.fallbackImages.collection,
+        tags: collection.tags,
+        href: linkTarget?.href ?? `/collections/${collection.id}`,
+        external: linkTarget?.external,
+      };
+    });
 }
 
 function resolveCollectionLink(collection: LafArchiveJSON["collections"][number]) {
@@ -791,11 +798,15 @@ function getDisplayAlbums(albums: LafAlbum[]): DisplayAlbum[] {
   }));
 }
 
-function fileSrc(file: LafFileAsset) {
-  return `/life-files/${file.relativePath
+function fileSrc(file: LafFileAsset, archiveKey?: string) {
+  const encodedPath = file.relativePath
     .split("/")
     .map(encodeURIComponent)
-    .join("/")}`;
+    .join("/");
+
+  return archiveKey
+    ? `/life-files/_archive/${encodeURIComponent(archiveKey)}/${encodedPath}`
+    : `/life-files/${encodedPath}`;
 }
 
 function matchesFileReference(file: LafFileAsset, reference: string) {

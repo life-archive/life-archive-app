@@ -31,6 +31,7 @@ export default async function AboutPage() {
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="about"
+        showAlbums={archive.getAlbums().length > 0}
         showCollections={archive.getCollections().length > 0}
         title={manifest.title}
       />

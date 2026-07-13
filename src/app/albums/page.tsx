@@ -52,6 +52,7 @@ export default async function AlbumsPage() {
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="albums"
+        showAlbums={albums.length > 0}
         showCollections={archive.getCollections().length > 0}
         title={manifest.title}
       />

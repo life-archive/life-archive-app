@@ -1,10 +1,9 @@
 import path from "node:path";
-import { readFile } from "node:fs/promises";
 
-import { rendererDefaults } from "@/defaults";
 import { resolveArchivePath, resolveWithin } from "@/lib/life/paths";
 import { redirectToImageFallback } from "@/app/imageFallback";
 import { getArchivePathForRequest } from "@/app/archiveSelection";
+import { archiveAssetResponse } from "@/app/archiveAssetResponse";
 
 const contentTypes: Record<string, string> = {
   gif: "image/gif",
@@ -26,15 +25,13 @@ export async function GET(
 
   try {
     const filePath = resolveWithin(albumsRoot, requestedPath);
-    const body = await readFile(filePath);
     const extension = path.extname(filePath).slice(1).toLowerCase();
 
-    return new Response(body, {
-      headers: {
-        "Cache-Control": rendererDefaults.cacheControl.asset,
-        "Content-Type": contentTypes[extension] ?? "application/octet-stream",
-      },
-    });
+    return await archiveAssetResponse(
+      request,
+      filePath,
+      contentTypes[extension] ?? "application/octet-stream",
+    );
   } catch {
     return redirectToImageFallback(request);
   }

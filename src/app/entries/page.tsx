@@ -7,6 +7,7 @@ import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../archiveSelection";
 import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
+import { entryExcerpt } from "../entryExcerpt";
 import { I18nProvider, T } from "../i18n/I18nProvider";
 import {
   archivePageMetadata,
@@ -55,6 +56,7 @@ export default async function EntriesPage() {
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="entries"
+        showAlbums={archive.getAlbums().length > 0}
         showCollections={archive.getCollections().length > 0}
         title={manifest.title}
       />
@@ -91,7 +93,7 @@ export default async function EntriesPage() {
                         {entry.title}
                       </h3>
                       <p className="mt-3 max-w-[720px] text-[17px] leading-[1.6] text-muted">
-                        {firstLine(entry)}
+                        {entryExcerpt(entry.body.markdown)}
                       </p>
                     </div>
                     <ArrowRight
@@ -133,15 +135,6 @@ function groupEntriesByYear(entries: LafEntry[]): EntryGroup[] {
 
 function compareEntries(a: LafEntry, b: LafEntry) {
   return (b.date ?? "").localeCompare(a.date ?? "");
-}
-
-function firstLine(entry: LafEntry) {
-  return (
-    entry.body.markdown
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .find(Boolean) ?? "No body text yet."
-  );
 }
 
 function getYearSpan(entries: LafEntry[]) {

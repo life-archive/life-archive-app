@@ -1,5 +1,4 @@
 import path from "node:path";
-import { readFile } from "node:fs/promises";
 
 import { rendererDefaults } from "@/defaults";
 import { resolveArchivePath, resolveWithin } from "@/lib/life/paths";
@@ -8,6 +7,7 @@ import {
   requestAcceptsImage,
 } from "@/app/imageFallback";
 import { getArchivePathForRequest } from "@/app/archiveSelection";
+import { archiveAssetResponse } from "@/app/archiveAssetResponse";
 
 const contentTypes: Record<string, string> = {
   gif: "image/gif",
@@ -23,21 +23,19 @@ export async function GET(
   context: { params: Promise<{ path: string[] }> },
 ) {
   const params = await context.params;
-  const requestedPath = params.path.join("/");
+  const requestedPath = stripArchiveCacheKey(params.path).join("/");
   const archivePath = getArchivePathForRequest(request);
   const filesRoot = resolveWithin(resolveArchivePath(archivePath), "files");
 
   try {
     const filePath = resolveWithin(filesRoot, requestedPath);
-    const body = await readFile(filePath);
     const extension = path.extname(filePath).slice(1).toLowerCase();
 
-    return new Response(body, {
-      headers: {
-        "Cache-Control": rendererDefaults.cacheControl.asset,
-        "Content-Type": contentTypes[extension] ?? "application/octet-stream",
-      },
-    });
+    return await archiveAssetResponse(
+      request,
+      filePath,
+      contentTypes[extension] ?? "application/octet-stream",
+    );
   } catch {
     if (requestAcceptsImage(request)) {
       return redirectToImageFallback(request, rendererDefaults.fallbackImages.hero);
@@ -45,4 +43,10 @@ export async function GET(
 
     return new Response("Not found", { status: 404 });
   }
+}
+
+function stripArchiveCacheKey(pathSegments: string[]) {
+  return pathSegments[0] === "_archive" && pathSegments.length > 2
+    ? pathSegments.slice(2)
+    : pathSegments;
 }

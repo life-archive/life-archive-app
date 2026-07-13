@@ -41,6 +41,7 @@ export const dictionaries = {
     "nav.albums": "Albums",
     "nav.collections": "Collections",
     "nav.about": "About",
+    "nav.search": "Search",
     "nav.openMenu": "Open menu",
     "theme.theme": "Theme",
     "theme.useTheme": "Use {label} theme",
