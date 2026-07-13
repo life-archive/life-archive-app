@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "import:wordpress": "node tools/wordpress/import-wordpress.mjs --clean",
     "start": "next start",
     "lint": "eslint"
   },

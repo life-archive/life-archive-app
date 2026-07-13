@@ -1,5 +1,5 @@
 export const rendererDefaults = {
-  archivePath: "content/demo.life",
+  archivePath: "content/madhan.life",
   systemPath: ".laf-system",
   defaultLocale: "en",
   defaultTheme: "gallery",
@@ -7,6 +7,9 @@ export const rendererDefaults = {
     album: "/laf/albums.png",
     collection: "/laf/collections.png",
     hero: "/laf/hero.png",
+  },
+  home: {
+    albumLimit: 20,
   },
   metadata: {
     defaultTitle: "Life Archive",

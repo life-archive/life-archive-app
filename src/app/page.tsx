@@ -46,6 +46,7 @@ export async function generateMetadata() {
 }
 
 export default async function Home() {
+  const renderStartedAt = performance.now();
   const archiveResult = await tryOpenArchive();
 
   if (!archiveResult.ok) {
@@ -55,10 +56,14 @@ export default async function Home() {
   const archive = archiveResult.archive;
   const data = archive.toJSON();
   const title = data.manifest.title;
-  const archiveSummary = firstReadmeParagraph(data.readme?.markdown);
   const entries = getDisplayEntries(data.entries);
   const files = archive.getFiles();
-  const heroFile = archive.resolveFile("hero.png");
+  const heroFile = resolveFirstFile(archive, [
+    "hero.jpg",
+    "hero.jpeg",
+    "hero.png",
+    "hero.webp",
+  ]);
   const profileFile = archive.resolveFile("profile.png");
   const heroImage = heroFile ? fileSrc(heroFile) : rendererDefaults.fallbackImages.hero;
   const profileImage = profileFile ? fileSrc(profileFile) : undefined;
@@ -70,6 +75,7 @@ export default async function Home() {
     collections.length > 0 || entries.length > 0 || albums.length > 0;
   const footerLinks = getFooterLinks(data.manifest);
   const footerEmail = manifestString(data.manifest, "email");
+  const renderTimeMs = Math.round(performance.now() - renderStartedAt);
 
   const heroMetadata = [
     entries.length > 0
@@ -121,11 +127,9 @@ export default async function Home() {
             <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,18,34,0.72)_0%,rgba(8,18,34,0.43)_42%,rgba(8,18,34,0.08)_78%)]" />
             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/42 to-transparent" />
 
-            <div className="relative flex min-h-[460px] flex-col justify-between p-6 text-white sm:p-8 lg:p-10">
-     
-
+            <div className="relative flex min-h-[460px] items-end p-6 text-white sm:p-8 lg:p-10">
               <div className="max-w-[760px]">
-                <div className="mb-8 flex items-end gap-5">
+                <div className="mb-4 flex items-end gap-5">
                   {profileImage && (
                     <div className="relative size-24 shrink-0 overflow-hidden rounded-full border border-white/30 bg-white/20 shadow-profile backdrop-blur-md sm:size-28">
                       <Image
@@ -144,9 +148,6 @@ export default async function Home() {
                     <h1 className="mt-2 font-serif text-[clamp(3.875rem,5.4vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.03em]">
                       {title}
                     </h1>
-                    <p className="mt-4 max-w-[560px] text-[17px] leading-[1.7] text-white/78">
-                      {archiveSummary}
-                    </p>
                   </div>
                 </div>
 
@@ -171,6 +172,22 @@ export default async function Home() {
       </section>
 
       {!hasHomeContent && <EmptyHomePlaceholder />}
+
+      {data.readme && (
+        <section className="border-t border-border px-5 py-8 lg:px-8 lg:py-10">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-5">
+              <h2 className="text-[22px] font-semibold leading-tight text-ink">
+                <T k="common.about" />
+              </h2>
+            </div>
+            <div
+              className="entry-body text-left text-[18px] leading-[1.75] text-prose"
+              dangerouslySetInnerHTML={{ __html: data.readme.html }}
+            />
+          </div>
+        </section>
+      )}
 
 {collections.length > 0 && (
 <section className="px-5 py-8 lg:px-8 lg:py-10" id="collections">
@@ -357,7 +374,7 @@ export default async function Home() {
     </div>
 
       <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4">
-  {albums.slice(0, 8).map((album) => (
+  {albums.map((album) => (
     <AlbumCard
       album={album}
       key={album.id}
@@ -417,6 +434,7 @@ export default async function Home() {
             <p>Format: {data.manifest.format}</p>
             <p><T k="footer.archiveSize" />: {formatBytes(archiveSize)}</p>
             <p><T k="footer.archiveLanguage" />: {data.manifest.language ?? "en-US"}</p>
+            <p>Render time: {renderTimeMs.toLocaleString()} ms</p>
           </FooterGroup>
 
           <FooterGroup title={<T k="theme.theme" />}>
@@ -444,14 +462,19 @@ function entryExcerpt(entry: LafEntry) {
   return markdownExcerpt(entry.body.markdown, "No body text yet.");
 }
 
-function firstReadmeParagraph(markdown?: string) {
-  return (
-    markdown
-      ?.split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0 && !line.startsWith("#"))
-      .at(0) ?? "A personal life archive."
-  );
+function resolveFirstFile(
+  archive: { resolveFile(filename: string): LafFileAsset | undefined },
+  filenames: string[],
+) {
+  for (const filename of filenames) {
+    const file = archive.resolveFile(filename);
+
+    if (file) {
+      return file;
+    }
+  }
+
+  return undefined;
 }
 
 function manifestString(
@@ -589,7 +612,7 @@ function getDisplayCollections(
     const filename = coverRef?.replace(/^file:/, "");
 
     const coverFile = filename
-      ? files.find((file) => file.filename === filename)
+      ? files.find((file) => matchesFileReference(file, filename))
       : undefined;
 
     return {
@@ -634,7 +657,7 @@ function markdownExcerpt(markdown: string, fallback: string) {
 }
 
 function getDisplayAlbums(albums: LafAlbum[]): DisplayAlbum[] {
-  return albums.slice(0, 8).map((album) => ({
+  return albums.slice(0, rendererDefaults.home.albumLimit).map((album) => ({
     id: album.id,
     title: album.title,
     count: album.files.length,
@@ -649,6 +672,12 @@ function fileSrc(file: LafFileAsset) {
     .split("/")
     .map(encodeURIComponent)
     .join("/")}`;
+}
+
+function matchesFileReference(file: LafFileAsset, reference: string) {
+  const normalized = reference.replace(/^files\//, "");
+
+  return file.relativePath === normalized || file.filename === normalized;
 }
 
 function albumThumbnailSrc(file: LafAlbumFile, width: number) {

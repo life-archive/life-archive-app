@@ -88,7 +88,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     .filter((file): file is LafFileAsset => Boolean(file));
 
   const imageFiles = files.filter(isImageFile);
-  const coverFile = getCoverFile(collection, files) ?? imageFiles[0];
+  const coverFile = getCoverFile(collection, archive.getFiles()) ?? imageFiles[0];
   const heroImage = coverFile
     ? fileSrc(coverFile)
     : rendererDefaults.fallbackImages.collection;
@@ -260,7 +260,13 @@ function getCoverFile(collection: LafCollection, files: LafFileAsset[]) {
     return undefined;
   }
 
-  return files.find((file) => file.filename === cover);
+  return files.find((file) => matchesFileReference(file, cover));
+}
+
+function matchesFileReference(file: LafFileAsset, reference: string) {
+  const normalized = reference.replace(/^files\//, "");
+
+  return file.relativePath === normalized || file.filename === normalized;
 }
 
 function isImageFile(file: LafFileAsset) {

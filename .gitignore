@@ -20,6 +20,9 @@
 # renderer runtime cache
 /.laf-system/
 
+# content changes
+/content/
+
 # production
 /build
 

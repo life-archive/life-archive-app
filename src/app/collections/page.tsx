@@ -187,7 +187,7 @@ function getDisplayCollections(
           : undefined);
       const filename = coverRef?.replace(/^file:/, "");
       const coverFile = filename
-        ? files.find((file) => file.filename === filename)
+        ? files.find((file) => matchesFileReference(file, filename))
         : undefined;
       const count =
         collection.items.length ||
@@ -228,4 +228,10 @@ function fileSrc(file: LafFileAsset) {
     .split("/")
     .map(encodeURIComponent)
     .join("/")}`;
+}
+
+function matchesFileReference(file: LafFileAsset, reference: string) {
+  const normalized = reference.replace(/^files\//, "");
+
+  return file.relativePath === normalized || file.filename === normalized;
 }

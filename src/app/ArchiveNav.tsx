@@ -6,7 +6,6 @@ import {
   FolderOpen,
   HomeIcon,
   ImageIcon,
-  Info,
   Menu,
   type LucideIcon,
 } from "lucide-react";
@@ -31,7 +30,6 @@ const navItems: Array<{
     icon: FolderOpen,
     requiresCollections: true,
   },
-  { href: "/about", labelKey: "nav.about", key: "about", icon: Info },
 ];
 
 export type ArchiveNavActive =
