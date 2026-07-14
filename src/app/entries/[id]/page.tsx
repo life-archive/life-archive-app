@@ -105,7 +105,7 @@ export default async function EntryPage({ params }: EntryPageProps) {
             {entry.kind && <span>{entry.kind}</span>}
             {entry.sourcePath && <span>{entry.sourcePath}</span>}
           </div>
-          <h1 className="mt-6 font-serif text-[clamp(4rem,8vw,7rem)] font-semibold leading-[0.92] tracking-[-0.04em]">
+          <h1 className="mt-6 font-serif text-[clamp(2.5rem,6vw,4rem)] font-semibold leading-[1.02] tracking-[-0.03em]">
             {entry.title}
           </h1>
         </header>

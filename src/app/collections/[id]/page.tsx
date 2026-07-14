@@ -169,9 +169,9 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             <T k="common.collections" />
           </NextLink>
 
-          <h2 className="mt-8 max-w-[1120px] font-serif text-[clamp(3rem,6vw,5.5rem)] font-semibold leading-[0.96] tracking-[-0.04em] text-ink">
+          <p className="mt-8 max-w-[900px] font-serif text-[clamp(1.5rem,3vw,2.5rem)] font-medium leading-[1.18] tracking-[-0.02em] text-ink">
             {description}
-          </h2>
+          </p>
 
           {collection.body.html && (
             <div

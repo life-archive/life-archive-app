@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 const defaults = {
-  xml: "tools/wordpress/kaizenist.xml",
-  archive: "content/madhan.life",
+  xml: "tools/wordpress/myfile.xml",
+  archive: "content/mylife.life",
   clean: false,
 };
 
@@ -137,9 +137,9 @@ for (const [slug, entryIds] of [...categoryEntries.entries()].sort()) {
 }
 
 const readme = [
-  "# Madhan Life Archive",
+  "# Imported Life Archive",
   "",
-  `Imported from ${site.link || "kaizen.ist"} WordPress export.`,
+  `Imported from ${site.link || "mysite.com"} WordPress export.`,
   "",
   `- ${posts.length} published posts/pages imported as entries`,
   `- ${categoryEntries.size} WordPress categories imported as collections`,
@@ -155,10 +155,10 @@ await writeFile(
   path.join(archivePath, "life.json"),
   `${JSON.stringify({
     format: "life/0.1",
-    title: site.title ? `${site.title} Life Archive` : "Madhan Life Archive",
-    owner: "madhan",
+    title: site.title ? `${site.title} Life Archive` : "Life Archive",
+    owner: "demo",
     language: site.language || "en-US",
-    website: site.link || "https://kaizen.ist",
+    website: site.link || "https://mysite.com",
   }, null, 2)}\n`,
   "utf8",
 );

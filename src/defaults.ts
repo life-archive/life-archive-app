@@ -1,5 +1,5 @@
 export const rendererDefaults = {
-  archivePath: "content/demo.life",
+  archivePath: "content/magical.life",
   archiveRouting: {
     mode: "single",
     hosts: {},

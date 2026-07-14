@@ -1,10 +1,10 @@
 {
   "format": "life/0.1",
-  "title": "Demo Life Archive",
-  "owner": "demo-archivist",
+  "title": "Life Archive Format",
+  "owner": "laf",
   "language": "en-US",
-  "website": "https://example.com",
+  "website": "https://lifearchive .com",
   "instagram": "https://www.instagram.com/demo",
-  "github": "https://github.com/demo",
+  "github": "https://github.com/life-archive/life-archive-app",
   "linkedin": "https://www.linkedin.com/in/demo/"
 }

@@ -21,7 +21,9 @@
 /.laf-system/
 
 # content changes
-/content/
+/content/*
+!/content/demo.life/
+!/content/demo.life/**
 
 # production
 /build
@@ -29,6 +31,7 @@
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -45,3 +48,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#others
+/tools/wordpress/*.xml
