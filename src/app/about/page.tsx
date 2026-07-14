@@ -56,7 +56,7 @@ export default async function AboutPage() {
           </p>
         )}
       </article>
-      <ArchivePageFooter title={manifest.title} />
+      <ArchivePageFooter theme={manifest.theme} title={manifest.title} />
     </main>
     </I18nProvider>
   );

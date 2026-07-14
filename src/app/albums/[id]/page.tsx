@@ -1,10 +1,10 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { tryOpenArchive, type LafAlbumFile } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 
 import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../../archiveSelection";
+import { ArchiveImage as Image } from "../../ArchiveImage";
 import { ArchiveUnavailable } from "../../ArchiveUnavailable";
 import { ArchivePageFooter } from "../../ArchivePageFooter";
 import { ArchiveNav } from "../../ArchiveNav";
@@ -157,7 +157,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
           )}
         </div>
       </section>
-      <ArchivePageFooter title={manifest.title} />
+      <ArchivePageFooter theme={manifest.theme} title={manifest.title} />
     </main>
     </I18nProvider>
   );

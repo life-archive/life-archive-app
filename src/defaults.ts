@@ -1,8 +1,11 @@
 export const rendererDefaults = {
   archivePath: "content/magical.life",
   archiveRouting: {
-    mode: "single",
-    hosts: {},
+    mode: "multi-host",
+  hosts: {
+    "madhan.xyz.com": "content/madhan.life",
+    "priya.xyz.com": "content/priya.life",
+    },
   },
   systemPath: ".laf-system",
   defaultLocale: "en",

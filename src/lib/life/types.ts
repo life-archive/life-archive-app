@@ -1,3 +1,5 @@
+import type { LafTheme } from "./themes";
+
 export const LAF_ENTITY_TYPES = [
   "entry",
   "person",
@@ -27,6 +29,7 @@ export type LafArchiveManifest = {
   title: string;
   owner?: string;
   language?: string;
+  theme?: LafTheme;
   [key: string]: unknown;
 };
 

@@ -3,11 +3,16 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 import { rendererDefaults } from "@/defaults";
+import {
+  isLafTheme,
+  normalizeLafTheme,
+  type LafTheme,
+} from "@/lib/life/themes";
 
 import { useI18n } from "./i18n/I18nProvider";
 
 const storageKey = "laf-theme";
-const defaultTheme = rendererDefaults.defaultTheme;
+const configuredDefaultTheme = normalizeLafTheme(rendererDefaults.defaultTheme);
 const themeChangeEvent = "laf:theme-change";
 const themes = [
   {
@@ -32,13 +37,21 @@ const themes = [
   },
 ] as const;
 
-type ThemeName = (typeof themes)[number]["name"];
+type ThemeName = LafTheme;
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({
+  defaultTheme: archiveDefaultTheme,
+}: {
+  defaultTheme?: LafTheme;
+}) {
   const { t } = useI18n();
+  const defaultTheme = normalizeLafTheme(
+    archiveDefaultTheme,
+    configuredDefaultTheme,
+  );
   const theme = useSyncExternalStore(
     subscribeToTheme,
-    getBrowserTheme,
+    () => getBrowserTheme(defaultTheme),
     () => defaultTheme,
   );
 
@@ -90,10 +103,10 @@ export function ThemeSwitcher() {
   );
 }
 
-function getBrowserTheme(): ThemeName {
+function getBrowserTheme(defaultTheme: ThemeName): ThemeName {
   const savedTheme = window.localStorage.getItem(storageKey);
 
-  return isThemeName(savedTheme) ? savedTheme : getDocumentTheme();
+  return isThemeName(savedTheme) ? savedTheme : getDocumentTheme(defaultTheme);
 }
 
 function subscribeToTheme(onChange: () => void) {
@@ -106,7 +119,7 @@ function subscribeToTheme(onChange: () => void) {
   };
 }
 
-function getDocumentTheme(): ThemeName {
+function getDocumentTheme(defaultTheme: ThemeName): ThemeName {
   const documentTheme = document.documentElement.dataset.theme;
 
   return isThemeName(documentTheme) ? documentTheme : defaultTheme;
@@ -117,8 +130,5 @@ function applyTheme(theme: ThemeName) {
 }
 
 function isThemeName(value: unknown): value is ThemeName {
-  return (
-    typeof value === "string" &&
-    themes.some((item) => item.name === value)
-  );
+  return isLafTheme(value);
 }

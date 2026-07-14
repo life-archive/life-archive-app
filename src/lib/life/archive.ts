@@ -10,6 +10,7 @@ import { indexAlbums } from "./albums";
 import { indexFileAssets, toArchivePath } from "./files";
 import { parseMarkdownFile, renderMarkdown } from "./markdown";
 import { resolveArchivePath, resolveWithin } from "./paths";
+import { LAF_THEMES } from "./themes";
 import {
   type LafAlbum,
   type LafArchiveJSON,
@@ -50,6 +51,7 @@ const manifestSchema = z
     title: z.string(),
     owner: z.string().optional(),
     language: z.string().optional(),
+    theme: z.enum(LAF_THEMES).optional(),
   })
   .passthrough();
 

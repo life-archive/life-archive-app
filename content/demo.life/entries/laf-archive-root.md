@@ -24,6 +24,7 @@ Every life archive begins with a root directory. The root holds the manifest, th
   "title": "The Bennett Family Archive",
   "owner": "Emily Bennett",
   "language": "en-US",
+  "theme": "dusk",
   "website": "https://archive.example.com",
   "email": "archive@example.com"
 }
@@ -38,11 +39,14 @@ Every life archive begins with a root directory. The root holds the manifest, th
 
 - `owner` identifies the person, family, or organization responsible for the archive.
 - `language` is a language or locale code such as `en`, `en-US`, or `ta-IN`.
+- `theme` selects the archive's initial visual theme. The reference app accepts `light`, `dusk`, `gallery`, or `dark`.
 - `website` gives the archive's canonical public website.
 - `email` supplies a public contact address when the archive owner wants one shown.
 - Social fields such as `github`, `instagram`, `linkedin`, and `youtube` may be used by renderers to create footer links.
 
 The manifest accepts additional JSON fields. This lets specialized tools preserve information such as license, creation date, source system, or custom publishing settings. Field names should be descriptive, and tools should preserve unknown fields when rewriting the manifest.
+
+`theme` is an archive default rather than a locked appearance. A renderer may allow visitors to choose another theme and remember that preference. When `theme` is omitted, the renderer chooses its configured fallback.
 
 `life.json` must contain valid JSON: property names and string values use double quotes, trailing commas are not allowed, and comments are not supported.
 

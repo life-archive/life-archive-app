@@ -14,7 +14,7 @@ collections:
 
 Application defaults are centralized in `src/defaults.ts`. Archive-specific identity and content belong in the selected archive's `life.json`, `README.md`, Markdown files, and media folders.
 
-Keeping those two layers separate makes an archive portable: changing the renderer's theme or cache location does not alter the archive, and moving the archive to another renderer does not carry app-specific runtime state with it.
+Keeping those two layers separate makes an archive portable: archive presentation preferences remain ordinary manifest metadata, while renderer cache and runtime settings stay with the application.
 
 ## Core paths and routing
 
@@ -45,7 +45,25 @@ home: {
 },
 ```
 
-The built-in theme names are `light`, `dusk`, `gallery`, and `dark`. `defaultTheme` chooses the initial appearance; a visitor's later choice is saved in browser storage.
+The built-in theme names are `light`, `dusk`, `gallery`, and `dark`. `defaultTheme` is the application fallback when the selected archive does not specify a theme.
+
+An archive can choose its own initial theme in `life.json`:
+
+```json
+{
+  "format": "life/0.1",
+  "title": "The Bennett Family Archive",
+  "theme": "dusk"
+}
+```
+
+Theme precedence is:
+
+1. the visitor's saved choice for that website;
+2. the selected archive's `theme` value;
+3. `rendererDefaults.defaultTheme`.
+
+This allows archives in a multi-host deployment to have different defaults while preserving each visitor's choice. Invalid theme names fail manifest validation instead of silently producing an undefined design.
 
 The archive manifest's `language` determines the initial interface language when it matches a supported locale. The current built-in locale codes are `en`, `de`, `es`, `fr`, `nl`, `pt`, `it`, `ja`, `zh`, and `ko`. Visitors can change the language in the interface, and their selection is saved locally.
 
@@ -77,4 +95,4 @@ Change cache headers deliberately. Archive files may be replaced without changin
 
 ## Archive configuration belongs in life.json
 
-Use `life.json` for the archive title, language, owner, website, email, and supported social links. Use `README.md` for the archive's About page. See [Archive root, life.json, and README.md](entries/laf-archive-root.md) for the complete format and examples.
+Use `life.json` for the archive title, language, theme, owner, website, email, and supported social links. Use `README.md` for the archive's About page. See [Archive root, life.json, and README.md](entries/laf-archive-root.md) for the complete format and examples.

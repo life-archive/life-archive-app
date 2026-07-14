@@ -115,7 +115,7 @@ export default async function EntryPage({ params }: EntryPageProps) {
           dangerouslySetInnerHTML={{ __html: entry.body.html }}
         />
       </article>
-      <ArchivePageFooter title={manifest.title} />
+      <ArchivePageFooter theme={manifest.theme} title={manifest.title} />
     </main>
     </I18nProvider>
   );

@@ -81,7 +81,7 @@ export default async function AlbumsPage() {
           )}
         </div>
       </section>
-      <ArchivePageFooter title={manifest.title} />
+      <ArchivePageFooter theme={manifest.theme} title={manifest.title} />
     </main>
     </I18nProvider>
   );

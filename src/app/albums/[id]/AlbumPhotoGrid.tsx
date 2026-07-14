@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   type CSSProperties,
@@ -15,6 +14,7 @@ import {
   dispatchAlbumViewChange,
   type AlbumViewMode,
 } from "./AlbumViewSwitch";
+import { ArchiveImage as Image } from "../../ArchiveImage";
 import {
   darkOverlayIconButtonBase,
   overlayIconButton,

@@ -93,7 +93,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               defaultValue={query}
               id="archive-search"
               name="q"
-              placeholder="Search recipes and entries"
+              placeholder="Search this archive"
               type="search"
             />
             <button
@@ -149,19 +149,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               ) : (
                 <div className="mt-8 rounded-[10px] border border-border bg-paper-subtle p-6">
                   <p className="text-[17px] text-muted">
-                    No entries matched “{query}”. Try a recipe name, ingredient, or collection.
+                    No entries matched “{query}”.
                   </p>
                 </div>
               )}
             </section>
           ) : (
             <p className="mt-10 text-[15px] text-muted">
-              Try a dish, ingredient, or category such as chicken, dosa, rice, or chutney.
+            --
             </p>
           )}
         </div>
 
-        <ArchivePageFooter title={manifest.title} />
+        <ArchivePageFooter theme={manifest.theme} title={manifest.title} />
       </main>
     </I18nProvider>
   );

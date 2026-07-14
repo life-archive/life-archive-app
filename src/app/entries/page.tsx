@@ -109,7 +109,7 @@ export default async function EntriesPage() {
           ))}
         </div>
       </div>
-      <ArchivePageFooter title={manifest.title} />
+      <ArchivePageFooter theme={manifest.theme} title={manifest.title} />
     </main>
     </I18nProvider>
   );

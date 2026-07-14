@@ -1,6 +1,6 @@
-import Image from "next/image";
-
 import { ArrowRight } from "lucide-react";
+
+import { ArchiveImage as Image } from "../ArchiveImage";
 
 export type DisplayAlbum = {
   id: string;

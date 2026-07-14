@@ -1,4 +1,3 @@
-import Image from "next/image";
 import NextLink from "next/link";
 import {
   ArrowRight,
@@ -17,6 +16,7 @@ import {
 import { rendererDefaults } from "@/defaults";
 
 import { getSiteUrlFromRequest, tryOpenSiteArchive } from "./archiveSelection";
+import { ArchiveImage as Image } from "./ArchiveImage";
 import { ArchiveNav } from "./ArchiveNav";
 import { ArchiveUnavailable } from "./ArchiveUnavailable";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -482,7 +482,7 @@ export default async function Home() {
           )}
 
           <FooterGroup title={<T k="theme.theme" />}>
-            <ThemeSwitcher />
+            <ThemeSwitcher defaultTheme={data.manifest.theme} />
           </FooterGroup>
 
           <FooterGroup title={<T k="language.language" />}>

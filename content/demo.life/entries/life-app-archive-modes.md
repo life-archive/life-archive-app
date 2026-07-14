@@ -57,6 +57,8 @@ unlisted.example.com      -> content/default.life
 
 The host match is case-insensitive. A trailing dot and port are removed, and when a proxy supplies multiple forwarded hosts, the first value is used. Each hostname must be listed explicitly; wildcard host mappings are not currently supported.
 
+Each selected archive supplies its own title, language, theme, favicon, content, and metadata from `life.json` and its files. For example, `family.life` can use `"theme": "dusk"` while `travel.life` uses `"theme": "dark"`; `rendererDefaults.defaultTheme` remains the fallback for archives without a theme.
+
 An unknown or missing hostname falls back to `archivePath`. Choose that default intentionally. If unrecognized hosts should not expose a personal archive, point `archivePath` to a safe public landing archive rather than a private tenant.
 
 ## Reverse proxies and forwarded headers

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter, Newsreader } from "next/font/google";
 
 import { rendererDefaults } from "@/defaults";
+import { normalizeLafTheme } from "@/lib/life/themes";
+
+import { tryOpenSiteArchive } from "./archiveSelection";
 
 import "./globals.css";
 
@@ -31,15 +34,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const archiveResult = await tryOpenSiteArchive();
+  const configuredDefaultTheme = normalizeLafTheme(rendererDefaults.defaultTheme);
+  const defaultTheme = normalizeLafTheme(
+    archiveResult.ok ? archiveResult.archive.getManifest().theme : undefined,
+    configuredDefaultTheme,
+  );
+
   return (
     <html
       lang="en"
-      data-theme={rendererDefaults.defaultTheme}
+      data-theme={defaultTheme}
       className={`${inter.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import NextLink from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -9,6 +8,7 @@ import {
 import { rendererDefaults } from "@/defaults";
 
 import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../archiveSelection";
+import { ArchiveImage as Image } from "../ArchiveImage";
 import { ArchiveUnavailable } from "../ArchiveUnavailable";
 import { ArchivePageFooter } from "../ArchivePageFooter";
 import { ArchiveNav } from "../ArchiveNav";
@@ -101,7 +101,7 @@ export default async function CollectionsPage() {
           )}
         </div>
       </section>
-      <ArchivePageFooter title={manifest.title} />
+      <ArchivePageFooter theme={manifest.theme} title={manifest.title} />
     </main>
     </I18nProvider>
   );

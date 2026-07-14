@@ -7,4 +7,5 @@ export {
 } from "./archive";
 export * from "./cache";
 export * from "./safe";
+export * from "./themes";
 export * from "./types";
