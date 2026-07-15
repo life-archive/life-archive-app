@@ -32,38 +32,38 @@ export function getArchivePathForRequest(request: Request) {
 }
 
 export async function getSiteUrlFromRequest(fallback?: string) {
-  if (archiveRouting.mode !== "multi-host") {
-    return fallback;
+  if (archiveRouting.mode !== "multi-host" && rendererConfig.siteUrl) {
+    return rendererConfig.siteUrl;
   }
 
   const headerList = await headers();
-  const protocol = firstHeaderValue(headerList.get("x-forwarded-proto")) ?? "https";
-  const host = normalizeHost(
+  const siteUrl = siteUrlFromRequestHeaders(
+    firstHeaderValue(headerList.get("x-forwarded-proto")),
     firstHeaderValue(headerList.get("x-forwarded-host")) ??
       firstHeaderValue(headerList.get("host")),
   );
 
-  return host ? `${protocol}://${host}` : fallback;
+  return siteUrl ?? rendererConfig.siteUrl ?? fallback;
 }
 
 export function getSiteUrlFromRouteRequest(
   request: Request,
   fallback?: string,
 ) {
-  if (archiveRouting.mode !== "multi-host") {
-    return fallback;
+  if (archiveRouting.mode !== "multi-host" && rendererConfig.siteUrl) {
+    return rendererConfig.siteUrl;
   }
 
   const url = new URL(request.url);
-  const host = normalizeHost(
+  const siteUrl = siteUrlFromRequestHeaders(
+    firstHeaderValue(request.headers.get("x-forwarded-proto")) ??
+      url.protocol.replace(/:$/, ""),
     firstHeaderValue(request.headers.get("x-forwarded-host")) ??
       firstHeaderValue(request.headers.get("host")) ??
       url.host,
   );
-  const protocol =
-    firstHeaderValue(request.headers.get("x-forwarded-proto")) ?? url.protocol.replace(/:$/, "");
 
-  return host ? `${protocol}://${host}` : fallback;
+  return siteUrl ?? rendererConfig.siteUrl ?? fallback;
 }
 
 function getArchivePathForHeaders(headerList: Headers) {
@@ -89,6 +89,26 @@ function normalizeHost(value: string | undefined) {
     .toLowerCase()
     .replace(/\.$/, "")
     .replace(/:\d+$/, "");
+}
+
+function siteUrlFromRequestHeaders(
+  protocolValue: string | undefined,
+  hostValue: string | undefined,
+) {
+  if (!hostValue) {
+    return undefined;
+  }
+
+  const protocol = protocolValue === "http" ? "http" : "https";
+  const host = hostValue.trim().toLowerCase().replace(/\.$/, "");
+
+  try {
+    const url = new URL(`${protocol}://${host}`);
+
+    return url.origin;
+  } catch {
+    return undefined;
+  }
 }
 
 function firstHeaderValue(value: string | null) {

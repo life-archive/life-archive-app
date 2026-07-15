@@ -60,7 +60,6 @@ export function ArchiveNav({
   title: string;
 }) {
   const { t } = useI18n();
-  const brandName = title.split(" ")[0] || title;
   const visibleNavItems = navItems.filter(
     (item) =>
       (!item.requiresAlbums || showAlbums) &&
@@ -74,8 +73,7 @@ export function ArchiveNav({
           className="font-serif text-2xl font-semibold tracking-[-0.03em] text-ink"
           href="/"
         >
-          {brandName}
-          <span className="text-accent">.life</span>
+          {title}
         </NextLink>
         <nav className="hidden items-center gap-1 rounded-full border border-border bg-nav-pill p-1 text-[13px] font-medium text-nav-muted shadow-nav lg:flex">
           {visibleNavItems.map((item) => {

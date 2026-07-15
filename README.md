@@ -1,5 +1,8 @@
 # Life Archive App
 
+> [!IMPORTANT]
+> **Official Life Archive Format website: [openlaf.org](https://openlaf.org)**
+
 Life Archive App is a self-hostable web app for publishing and browsing Life Archive Format (LAF) folders.
 
 LAF is an open, portable, file-based format for preserving personal stories, photographs, places, people, files, collections, and memories.
@@ -347,9 +350,12 @@ Supported overrides:
 - `LAF_ARCHIVE_PATH`: fallback archive folder
 - `NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE`: `single` or `multi-host`
 - `LAF_ARCHIVE_HOSTS`: JSON object mapping hostnames to archive folders
+- `LAF_SITE_URL`: canonical public origin for a single-site deployment
 - `LAF_SYSTEM_PATH`: runtime cache folder
 
 The routing mode uses a `NEXT_PUBLIC_` variable because the shared image component needs it to decide whether Next.js image optimization is safe. Archive paths and hostname mappings remain server-only.
+
+Set `LAF_SITE_URL` to the public origin, such as `https://openlaf.org`, when deploying in single mode. This ensures canonical, Open Graph, Twitter image, sitemap, and robots URLs never fall back to a local server address. In multi-host mode, the request `X-Forwarded-Host` or `Host` header determines the public origin for each site.
 
 Current defaults include:
 
@@ -378,3 +384,7 @@ src/app/i18n/dictionaries.ts
 Life Archive Format and this renderer are under active development.
 
 The current implementation supports the archive structure and rendering behavior documented above. The broader LAF specification may evolve as editors, importers, exporters, search, maps, and other renderers are developed.
+
+## License
+
+Life Archive App is available under the [MIT License](LICENSE).

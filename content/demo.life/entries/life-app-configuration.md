@@ -12,27 +12,37 @@ collections:
   - life-archive-app
 ---
 
-Application defaults are centralized in `src/defaults.ts`. Archive-specific identity and content belong in the selected archive's `life.json`, `README.md`, Markdown files, and media folders.
+Tracked application defaults are centralized in `src/defaults.ts`. Deployment-specific overrides belong in the root `.env.local`, which Git ignores. Archive-specific identity and content belong in the selected archive's `life.json`, `README.md`, Markdown files, and media folders.
 
 Keeping those two layers separate makes an archive portable: archive presentation preferences remain ordinary manifest metadata, while renderer cache and runtime settings stay with the application.
 
 ## Core paths and routing
 
-```ts
-archivePath: "content/demo.life",
-archiveRouting: {
-  mode: "single",
-  hosts: {},
-},
-systemPath: ".laf-system",
+Copy the tracked example and customize the local file:
+
+```powershell
+Copy-Item .env.example .env.local
 ```
 
-- `archivePath` is the default `.life` folder. Relative paths may be written with or without the leading `content/` segment, but they resolve inside the app's `content` directory.
-- `archiveRouting.mode` is either `single` or `multi-host`.
-- `archiveRouting.hosts` maps normalized hostnames to archive paths in multi-host mode.
-- `systemPath` stores app-generated data such as cached album thumbnails. A relative path is resolved from the project root; an absolute path may point to a writable mounted volume or temporary directory.
+```dotenv
+LAF_ARCHIVE_PATH=content/demo.life
+NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE=single
+LAF_ARCHIVE_HOSTS={}
+LAF_SITE_URL=https://archive.example.com
+LAF_SYSTEM_PATH=.laf-system
+```
 
-Do not place original archive material under `systemPath`. It is cache space and should be safe to recreate.
+- `LAF_ARCHIVE_PATH` is the default `.life` folder. Relative paths may be written with or without the leading `content/` segment, but they resolve inside the app's `content` directory.
+- `NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE` is either `single` or `multi-host`. Because the image component also needs this value, changing it requires rebuilding the app.
+- `LAF_ARCHIVE_HOSTS` is a JSON object mapping normalized hostnames to archive paths in multi-host mode.
+- `LAF_SITE_URL` is the canonical public origin for a single-site deployment, such as `https://openlaf.org`.
+- `LAF_SYSTEM_PATH` stores app-generated data such as cached album thumbnails. A relative path is resolved from the project root; an absolute path may point to a writable mounted volume or temporary directory.
+
+Do not place original archive material under `LAF_SYSTEM_PATH`. It is cache space and should be safe to recreate.
+
+In single mode, an explicit `LAF_SITE_URL` is used for canonical, Open Graph, Twitter image, sitemap, and robots URLs. If it is omitted, the app uses the request's forwarded host or host header and then the selected archive's `life.json.website` value.
+
+In multi-host mode, the request hostname takes precedence so every archive receives URLs on its own domain. Leave `LAF_SITE_URL` unset for normal multi-host deployments; it is only an emergency fallback when the request has no usable hostname.
 
 ## Presentation defaults
 
@@ -85,7 +95,7 @@ metadata: {
 
 Fallback images live in `public/laf/` and are used when an archive does not provide a suitable image. An archive can supply its own `files/hero.png` and `files/favicon.svg` or `files/favicon.ico` without modifying the shared public fallbacks.
 
-The metadata values are application fallbacks. When an archive loads successfully, its manifest title and description provide the site-specific identity.
+The metadata values are application fallbacks. When an archive loads successfully, its manifest title and description provide the site-specific identity. Absolute metadata URLs use `LAF_SITE_URL` in single mode or the request hostname in multi-host mode, with `life.json.website` as a fallback.
 
 ## Links and cache headers
 

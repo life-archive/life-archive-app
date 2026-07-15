@@ -21,7 +21,7 @@ export const rendererDefaults = {
     description: "Reference renderer for Life Archive Format archives.",
   },
   links: {
-    project: "https://github.com/life-archive/life-archive-app",
+    project: "https://openlaf.org",
   },
   cacheControl: {
     asset: "public, no-cache",

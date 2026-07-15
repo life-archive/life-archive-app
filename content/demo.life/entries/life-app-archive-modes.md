@@ -18,32 +18,27 @@ Life Archive App supports two archive-routing modes. **Single-archive mode** ser
 
 This is the default and the best choice for most installations:
 
-```ts
-archivePath: "content/demo.life",
-archiveRouting: {
-  mode: "single",
-  hosts: {},
-},
+```dotenv
+LAF_ARCHIVE_PATH=content/demo.life
+NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE=single
+LAF_ARCHIVE_HOSTS={}
+LAF_SITE_URL=https://archive.example.com
 ```
 
 Every route reads `content/demo.life`. The same archive supplies pages, search results, metadata, sitemap, favicon, files, album images, and thumbnails.
 
 Use single mode when deploying one public archive, testing locally, or running separate application instances for separate sites. It has the fewest DNS and reverse-proxy requirements.
 
+`LAF_SITE_URL` should be the site's public origin. The app uses it for canonical URLs, Open Graph and Twitter images, sitemap entries, and robots metadata. If it is omitted, the request hostname is used, followed by the selected archive's `life.json.website` value as a fallback.
+
 ## Multi-host mode
 
 Multi-host mode maps hostnames to archive folders:
 
-```ts
-archivePath: "content/default.life",
-archiveRouting: {
-  mode: "multi-host",
-  hosts: {
-    "archive.example.com": "content/family.life",
-    "www.archive.example.com": "content/family.life",
-    "travel.example.com": "content/travel.life",
-  },
-},
+```dotenv
+LAF_ARCHIVE_PATH=content/default.life
+NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE=multi-host
+LAF_ARCHIVE_HOSTS={"archive.example.com":"content/family.life","www.archive.example.com":"content/family.life","travel.example.com":"content/travel.life"}
 ```
 
 With this configuration:
@@ -58,6 +53,8 @@ unlisted.example.com      -> content/default.life
 The host match is case-insensitive. A trailing dot and port are removed, and when a proxy supplies multiple forwarded hosts, the first value is used. Each hostname must be listed explicitly; wildcard host mappings are not currently supported.
 
 Each selected archive supplies its own title, language, theme, favicon, content, and metadata from `life.json` and its files. For example, `family.life` can use `"theme": "dusk"` while `travel.life` uses `"theme": "dark"`; `rendererDefaults.defaultTheme` remains the fallback for archives without a theme.
+
+Do not normally set `LAF_SITE_URL` in multi-host mode. The incoming `X-Forwarded-Host` or `Host` is the primary origin, allowing each hostname to emit its own canonical and social-preview URLs. If configured, `LAF_SITE_URL` is used only when no valid request hostname is available, before falling back to the selected archive's `life.json.website` value.
 
 An unknown or missing hostname falls back to `archivePath`. Choose that default intentionally. If unrecognized hosts should not expose a personal archive, point `archivePath` to a safe public landing archive rather than a private tenant.
 

@@ -15,6 +15,9 @@ export const rendererConfig = {
     ),
     hosts: readArchiveHosts(process.env.LAF_ARCHIVE_HOSTS),
   },
+  siteUrl: readOptionalSiteUrl(
+    process.env.LAF_SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL,
+  ),
   systemPath: readOptionalValue(
     process.env.LAF_SYSTEM_PATH,
     rendererDefaults.systemPath,
@@ -23,6 +26,26 @@ export const rendererConfig = {
 
 function readOptionalValue(value: string | undefined, fallback: string) {
   return value?.trim() || fallback;
+}
+
+function readOptionalSiteUrl(value: string | undefined) {
+  if (!value?.trim()) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value);
+
+    if (url.protocol === "http:" || url.protocol === "https:") {
+      return url.origin;
+    }
+  } catch {
+    // Throw the configuration error below.
+  }
+
+  throw new Error(
+    "LAF_SITE_URL must be an absolute HTTP or HTTPS URL.",
+  );
 }
 
 function readArchiveRoutingMode(

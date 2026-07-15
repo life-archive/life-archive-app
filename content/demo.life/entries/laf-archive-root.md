@@ -40,13 +40,15 @@ Every life archive begins with a root directory. The root holds the manifest, th
 - `owner` identifies the person, family, or organization responsible for the archive.
 - `language` is a language or locale code such as `en`, `en-US`, or `ta-IN`.
 - `theme` selects the archive's initial visual theme. The reference app accepts `light`, `dusk`, `gallery`, or `dark`.
-- `website` gives the archive's canonical public website.
+- `website` gives the archive's public website and acts as the reference app's fallback origin for canonical links, social-preview images, sitemap entries, and robots metadata.
 - `email` supplies a public contact address when the archive owner wants one shown.
 - Social fields such as `github`, `instagram`, `linkedin`, and `youtube` may be used by renderers to create footer links.
 
 The manifest accepts additional JSON fields. This lets specialized tools preserve information such as license, creation date, source system, or custom publishing settings. Field names should be descriptive, and tools should preserve unknown fields when rewriting the manifest.
 
 `theme` is an archive default rather than a locked appearance. A renderer may allow visitors to choose another theme and remember that preference. When `theme` is omitted, the renderer chooses its configured fallback.
+
+The archive `website` value travels with the archive, while deployment configuration belongs to the renderer. In a single-site Life Archive App deployment, `LAF_SITE_URL` can explicitly set the canonical public origin and takes precedence over `website`. In multi-host mode, the request's `X-Forwarded-Host` or `Host` determines the origin for each archive, and `website` remains a fallback if no usable host is available.
 
 `life.json` must contain valid JSON: property names and string values use double quotes, trailing commas are not allowed, and comments are not supported.
 

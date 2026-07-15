@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
   const siteUrl =
-    (await getSiteUrlFromRequest(siteUrlFromManifest(manifest))) ??
+    (await getSiteUrlFromRequest(manifestSiteUrl(manifest))) ??
     "http://localhost:3000";
   const staticRoutes = ["/", "/entries", "/albums", "/collections"];
   const entryRoutes = archive
@@ -37,30 +37,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ].map((route) => ({
     url: absoluteUrl(siteUrl, route),
   }));
-}
-
-function siteUrlFromManifest(manifest: Record<string, unknown>) {
-  return (
-    manifestSiteUrl(manifest) ??
-    siteUrlFromEnvironment() ??
-    "http://localhost:3000"
-  );
-}
-
-function siteUrlFromEnvironment() {
-  const value = process.env.NEXT_PUBLIC_SITE_URL;
-
-  if (!value) {
-    return undefined;
-  }
-
-  try {
-    const url = new URL(value);
-
-    return `${url.protocol}//${url.host}`;
-  } catch {
-    return undefined;
-  }
 }
 
 function absoluteUrl(siteUrl: string, route: string) {

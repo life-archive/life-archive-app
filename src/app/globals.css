@@ -290,3 +290,32 @@ body {
   color: var(--color-soft);
   padding-left: 1.25rem;
 }
+
+.entry-body table {
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.entry-body th,
+.entry-body td {
+  border: 1px solid var(--color-border-strong);
+  min-width: 15rem;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.entry-body th {
+  background: var(--color-paper-subtle);
+  color: var(--color-ink);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.entry-body td {
+  font-size: 1rem;
+  line-height: 1.55;
+}

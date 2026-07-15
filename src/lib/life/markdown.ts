@@ -1,5 +1,6 @@
 import matter from "gray-matter";
 import { remark } from "remark";
+import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
 
 import type { LafMarkdownDocument } from "./types";
@@ -20,6 +21,7 @@ const archiveMarkdownRoots = new Set([
 
 export async function renderMarkdown(markdown: string): Promise<string> {
   const rendered = await remark()
+    .use(remarkGfm)
     .use(rewriteArchiveUrls)
     .use(remarkHtml)
     .process(markdown);
@@ -154,6 +156,10 @@ function resolveMarkdownUrl(rawUrl: string): string {
 
   if (root === "albums") {
     return `${routeAlbumPath(segments)}${suffix}`;
+  }
+
+  if (root === "album-thumbs") {
+    return `${routeArchiveAsset("life-album-thumbs", segments)}${suffix}`;
   }
 
   return "#";

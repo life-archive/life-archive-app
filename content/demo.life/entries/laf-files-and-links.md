@@ -80,6 +80,14 @@ Archive-relative Markdown URLs start at a recognized archive root:
 
 The reference app rewrites these source paths into website routes. The Markdown remains portable and understandable outside the app.
 
+The reference app also supports generated album thumbnails in Markdown. Put the desired pixel width after `album-thumbs/`, followed by the image path relative to `albums/`:
+
+```md
+[![A smaller preview](album-thumbs/640/summer-in-iceland/01-waterfall.jpg)](albums/summer-in-iceland/01-waterfall.jpg)
+```
+
+In this example, the page displays a cached 640-pixel-wide preview while the link opens the original album image. Generated thumbnails are stored in the renderer's disposable system cache and do not modify the archive.
+
 External links are allowed for `http`, `https`, `mailto`, and `tel` URLs:
 
 ```md
