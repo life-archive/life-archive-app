@@ -2,7 +2,7 @@ import "server-only";
 
 import path from "node:path";
 
-import { rendererDefaults } from "@/defaults";
+import { rendererConfig } from "@/rendererConfig";
 
 export function getContentRoot() {
   return path.join(
@@ -16,7 +16,7 @@ export function getProjectRoot() {
 }
 
 export function resolveArchivePath(
-  archivePath: string = rendererDefaults.archivePath,
+  archivePath: string = rendererConfig.archivePath,
 ) {
   const contentRoot = getContentRoot();
   const normalized = archivePath.replaceAll("\\", "/").replace(/^\.\//, "");
@@ -35,7 +35,7 @@ export function resolveArchivePath(
 }
 
 export function resolveSystemPath(
-  systemPath: string = rendererDefaults.systemPath,
+  systemPath: string = rendererConfig.systemPath,
 ) {
   const projectRoot = getProjectRoot();
   const normalized = systemPath.replaceAll("\\", "/").replace(/^\.\//, "");

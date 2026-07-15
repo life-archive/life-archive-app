@@ -1,5 +1,5 @@
 import type { ArchiveContentError } from "@/lib/life";
-import { rendererDefaults } from "@/defaults";
+import { rendererConfig } from "@/rendererConfig";
 
 export function ArchiveUnavailable({
   error,
@@ -18,7 +18,7 @@ export function ArchiveUnavailable({
         <p className="mt-5 max-w-[620px] text-[17px] leading-[1.7] text-muted">
           The renderer found a problem while reading the archive at{" "}
           <code className="rounded bg-chip px-1.5 py-0.5 text-sm text-ink">
-            {rendererDefaults.archivePath}
+            {rendererConfig.archivePath}
           </code>
           . Fix the archive content and rebuild or restart the app.
         </p>

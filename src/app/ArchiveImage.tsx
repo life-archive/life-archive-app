@@ -2,10 +2,9 @@ import Image, { type ImageProps } from "next/image";
 
 import { rendererDefaults } from "@/defaults";
 
-type ArchiveRoutingMode = "single" | "multi-host";
-
-const archiveRoutingMode = rendererDefaults.archiveRouting
-  .mode as ArchiveRoutingMode;
+const archiveRoutingMode =
+  process.env.NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE ??
+  rendererDefaults.archiveRouting.mode;
 const isMultiHostMode = archiveRoutingMode === "multi-host";
 
 export function ArchiveImage(props: ImageProps) {

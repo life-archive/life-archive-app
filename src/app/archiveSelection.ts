@@ -2,29 +2,22 @@ import "server-only";
 
 import { headers } from "next/headers";
 
-import { rendererDefaults } from "@/defaults";
 import { tryOpenArchive } from "@/lib/life";
+import { rendererConfig } from "@/rendererConfig";
 
-type ArchiveRoutingMode = "single" | "multi-host";
-
-type ArchiveRoutingConfig = {
-  hosts?: Record<string, string>;
-  mode?: ArchiveRoutingMode;
-};
-
-const archiveRouting = rendererDefaults.archiveRouting as ArchiveRoutingConfig;
+const archiveRouting = rendererConfig.archiveRouting;
 
 export async function tryOpenSiteArchive() {
   return tryOpenArchive(await getSiteArchivePath());
 }
 
 export function tryOpenDefaultArchive() {
-  return tryOpenArchive(rendererDefaults.archivePath);
+  return tryOpenArchive(rendererConfig.archivePath);
 }
 
 export async function getSiteArchivePath() {
   if (archiveRouting.mode !== "multi-host") {
-    return rendererDefaults.archivePath;
+    return rendererConfig.archivePath;
   }
 
   return getArchivePathForHeaders(await headers());
@@ -32,7 +25,7 @@ export async function getSiteArchivePath() {
 
 export function getArchivePathForRequest(request: Request) {
   if (archiveRouting.mode !== "multi-host") {
-    return rendererDefaults.archivePath;
+    return rendererConfig.archivePath;
   }
 
   return getArchivePathForHeaders(request.headers);
@@ -80,10 +73,10 @@ function getArchivePathForHeaders(headerList: Headers) {
   );
 
   if (!host) {
-    return rendererDefaults.archivePath;
+    return rendererConfig.archivePath;
   }
 
-  return archiveRouting.hosts?.[host] ?? rendererDefaults.archivePath;
+  return archiveRouting.hosts[host] ?? rendererConfig.archivePath;
 }
 
 function normalizeHost(value: string | undefined) {

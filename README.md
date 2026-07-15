@@ -280,18 +280,15 @@ By default, runtime cache files are written under:
 .laf-system/cache/...
 ```
 
-If the deployment target has a read-only project filesystem, set `systemPath` in `src/defaults.ts` to a writable location such as a mounted volume or `/tmp/life-archive-app`.
+If the deployment target has a read-only project filesystem, set `LAF_SYSTEM_PATH` to a writable location such as a mounted volume or `/tmp/life-archive-app`.
 
 ### Single Archive Mode
 
-By default, the app serves one archive configured by `archivePath` in `src/defaults.ts`:
+By default, the app serves the archive configured by `archivePath` in `src/defaults.ts`. Override it for a local deployment without changing tracked files:
 
-```ts
-archivePath: "content/demo.life",
-archiveRouting: {
-  mode: "single",
-  hosts: {},
-}
+```dotenv
+LAF_ARCHIVE_PATH=content/demo.life
+NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE=single
 ```
 
 This mode is best for most deployments. The app has one content source, routes such as `/entries/...` always refer to that archive, and static generation can still work where Next.js can prerender pages from the default archive.
@@ -309,19 +306,12 @@ astro.mydomain.com      -> content/astro.life
 projects.mydomain.com     -> content/projects.life
 ```
 
-Configure this in `src/defaults.ts`:
+Configure this in `.env.local`:
 
-```ts
-archivePath: "content/madhan.life",
-archiveRouting: {
-  mode: "multi-host",
-  hosts: {
-    "mydomain.com": "content/john.life",
-    "www.mydomain.com": "content/john.life",
-    "astro.mydomain.com": "content/astro.life",
-    "projects.mydomain.com": "content/projects.life",
-  },
-}
+```dotenv
+LAF_ARCHIVE_PATH=content/madhan.life
+NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE=multi-host
+LAF_ARCHIVE_HOSTS={"mydomain.com":"content/john.life","www.mydomain.com":"content/john.life","astro.mydomain.com":"content/astro.life","projects.mydomain.com":"content/projects.life"}
 ```
 
 In multi-host mode, the renderer selects the archive from the request `Host` or `X-Forwarded-Host` header. Page rendering, metadata, sitemap, robots, favicon, file routes, album routes, and thumbnail generation all use the selected archive.
@@ -340,11 +330,26 @@ If the archive cannot be read, or `life.json` is missing or invalid, the rendere
 
 ## Configuration
 
-Renderer defaults are centralized in:
+Tracked renderer defaults are centralized in:
 
 ```txt
 src/defaults.ts
 ```
+
+To customize a deployment without editing tracked source files, copy `.env.example` to `.env.local` and change the values there. Next.js automatically loads the root `.env.local` file, and Git ignores it. Environment values override `src/defaults.ts` during development and production builds.
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Supported overrides:
+
+- `LAF_ARCHIVE_PATH`: fallback archive folder
+- `NEXT_PUBLIC_LAF_ARCHIVE_ROUTING_MODE`: `single` or `multi-host`
+- `LAF_ARCHIVE_HOSTS`: JSON object mapping hostnames to archive folders
+- `LAF_SYSTEM_PATH`: runtime cache folder
+
+The routing mode uses a `NEXT_PUBLIC_` variable because the shared image component needs it to decide whether Next.js image optimization is safe. Archive paths and hostname mappings remain server-only.
 
 Current defaults include:
 

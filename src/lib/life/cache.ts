@@ -6,7 +6,7 @@ import { mkdir, stat } from "node:fs/promises";
 
 import sharp from "sharp";
 
-import { rendererDefaults } from "@/defaults";
+import { rendererConfig } from "@/rendererConfig";
 
 import { type LafAlbumFile } from "./types";
 import { resolveArchivePath, resolveSystemPath, resolveWithin } from "./paths";
@@ -90,7 +90,7 @@ export function normalizeThumbnailWidth(width: unknown): number {
 }
 
 function resolveDefaultArchiveRoot(
-  archivePath: string = rendererDefaults.archivePath,
+  archivePath: string = rendererConfig.archivePath,
 ) {
   return resolveArchivePath(archivePath);
 }
