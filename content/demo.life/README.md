@@ -1,7 +1,5 @@
-> **NOTE**
-> This website is a demo of the Life Archive Format
 
-A **Life Archive Format (LAF)** format, an open specification for creating portable, file-based personal archives.  
+A **Life Archive Format (LAF)** format, a simple open specification for creating portable, file-based personal archives.  
 
 Whether you're building 
 - a personal website
@@ -17,11 +15,16 @@ a `.life` folder archive keeps your content in a portable, application-independe
 
 The Life Archive app is the open source MIT-licensed reference website renderer of the .life format. The application reads the archive and presents it as a beautiful website without modifying the underlying content. Access the Git Hub repository for the Life Archive app at [https://github.com/life-archive/life-archive-app](https://github.com/life-archive/life-archive-app).
 
+> **NOTE**
+> This website is a demo of the Life Archive Format
+
+
 ### Features
 
 - Open Source / MIT License
 - Open Life Archive Format `.life` file format
 - Read-only archive rendering
+- Can be Self-Hosted
 - Markdown entries
 - SEO friendly
 - Photo albums with automatic thumbnail generation
@@ -49,22 +52,6 @@ Here are some examples of the Life Archive App rendering a .life folder. It can 
 
 [View the complete Screenshot album](albums/screenshots)
 
-## Start Exploring
-
-Learn how the portable format works or follow the practical guides for running the reference application.
-
-| [Life Archive Format](collections/life-archive-format.md) | [Life Archive App](collections/life-archive-app.md) |
-| --- | --- |
-| [Format overview](entries/laf-format-overview.md) | [App overview](entries/life-app-overview.md) |
-| [Archive root, life.json, and README.md](entries/laf-archive-root.md) | [Installation](entries/life-app-installation.md) |
-| [Entries](entries/laf-entries.md) | [Configuration](entries/life-app-configuration.md) |
-| [Collections](entries/laf-collections.md) | [Single-archive and multi-host modes](entries/life-app-archive-modes.md) |
-| [People and places](entries/laf-people-and-places.md) | [Deployment](entries/life-app-deployment.md) |
-| [Albums](entries/laf-albums.md) | [Operations and troubleshooting](entries/life-app-operations.md) |
-| [Files, media, and archive links](entries/laf-files-and-links.md) |  |
-
-
-
 ### Philosophy
 
 Most of us accumulate a lifetime of stories, photographs, documents and memories, yet they end up scattered across many different applications and online services. Over time those services change, disappear or make it difficult to move your information elsewhere.
@@ -75,7 +62,9 @@ By separating the archive from the software, your content remains portable. You 
 
 The Life Archive format is meant to be simple, open and a long term archival format to store a person's life stories, photographs, places, people, files, collections and memories. It is not a database or a cloud service. It is a folder of Markdown files, media files and metadata that can be copied, backed up, versioned, rendered or edited by different tools.
 
+Creating a photo album is as simple as creating a sub folder with photos into the 'albums' folder. Adding photos to a album is just again dropping more photos into that folder. The application will automatically generate thumbnails and render the album in a beautiful layout.
 
+The same philosophy holds true for entries, collections and files. 
 
 ### Open Format
 
@@ -92,6 +81,24 @@ MyArchive.life/
     albums/
     files/
 ```
+
+You can inspect a sample archive that powers this site at [Sample Life Archive](https://github.com/life-archive/life-archive-app/tree/main/content/demo.life)
+
+
+## Start Exploring
+
+Learn how the portable format works or follow the practical guides for running the reference application.
+
+| [Life Archive Format](collections/life-archive-format.md) | [Life Archive App](collections/life-archive-app.md) |
+| --- | --- |
+| [Format overview](entries/laf-format-overview.md) | [App overview](entries/life-app-overview.md) |
+| [Archive root, life.json, and README.md](entries/laf-archive-root.md) | [Installation](entries/life-app-installation.md) |
+| [Entries](entries/laf-entries.md) | [Configuration](entries/life-app-configuration.md) |
+| [Collections](entries/laf-collections.md) | [Single-archive and multi-host modes](entries/life-app-archive-modes.md) |
+| [People and places](entries/laf-people-and-places.md) | [Deployment](entries/life-app-deployment.md) |
+| [Albums](entries/laf-albums.md) | [Operations and troubleshooting](entries/life-app-operations.md) |
+| [Files, media, and archive links](entries/laf-files-and-links.md) |  |
+
 
 ### Life Archive App Requirements
 
