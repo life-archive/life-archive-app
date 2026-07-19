@@ -23,6 +23,13 @@ const navItems: Array<{
   requiresCollections?: boolean;
 }> = [
   { href: "/", labelKey: "nav.home", key: "home", icon: HomeIcon },
+  {
+    href: "/collections",
+    labelKey: "nav.collections",
+    key: "collections",
+    icon: FolderOpen,
+    requiresCollections: true,
+  },
   { href: "/entries", labelKey: "nav.entries", key: "entries", icon: BookOpen },
   {
     href: "/albums",
@@ -30,13 +37,6 @@ const navItems: Array<{
     key: "albums",
     icon: ImageIcon,
     requiresAlbums: true,
-  },
-  {
-    href: "/collections",
-    labelKey: "nav.collections",
-    key: "collections",
-    icon: FolderOpen,
-    requiresCollections: true,
   },
 ];
 

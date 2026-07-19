@@ -25,6 +25,16 @@ Every life archive begins with a root directory. The root holds the manifest, th
   "owner": "Emily Bennett",
   "language": "en-US",
   "theme": "dusk",
+  "labels": {
+    "collection": "Project",
+    "collections": "Projects"
+  },
+  "home": {
+    "albumLimit": 20,
+    "collectionLimit": 25,
+    "entryLimit": 3,
+    "timelineEntryLimit": 6
+  },
   "website": "https://archive.example.com",
   "email": "archive@example.com"
 }
@@ -40,6 +50,8 @@ Every life archive begins with a root directory. The root holds the manifest, th
 - `owner` identifies the person, family, or organization responsible for the archive.
 - `language` is a language or locale code such as `en`, `en-US`, or `ta-IN`.
 - `theme` selects the archive's initial visual theme. The reference app accepts `light`, `dusk`, `gallery`, or `dark`.
+- `labels.collection` and `labels.collections` customize the singular and plural names used for collections in navigation and page headings. For example, an archive can call them `Project` and `Projects`. Omitted values fall back to `Collection` and `Collections`.
+- `home.albumLimit`, `home.collectionLimit`, `home.entryLimit`, and `home.timelineEntryLimit` control how much archive content appears on the home page. A value of `0` hides that section without removing its full archive page.
 - `website` gives the archive's public website and acts as the reference app's fallback origin for canonical links, social-preview images, sitemap entries, and robots metadata.
 - `email` supplies a public contact address when the archive owner wants one shown.
 - Social fields such as `github`, `instagram`, `linkedin`, and `youtube` may be used by renderers to create footer links.

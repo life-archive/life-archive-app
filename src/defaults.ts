@@ -12,10 +12,6 @@ export const rendererDefaults = {
     collection: "/laf/collections.png",
     hero: "/laf/hero.png",
   },
-  home: {
-    albumLimit: 20,
-    collectionLimit: 25,
-  },
   metadata: {
     defaultTitle: "Life Archive",
     description: "Reference renderer for Life Archive Format archives.",

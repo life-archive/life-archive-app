@@ -12,6 +12,8 @@ import {
   type LafArchiveJSON,
   type LafEntry,
   type LafFileAsset,
+  resolveArchiveLabels,
+  resolveHomeSettings,
 } from "@/lib/life";
 import { rendererDefaults } from "@/defaults";
 
@@ -23,6 +25,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { RevealEmailLink } from "./RevealEmailLink";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { AlbumCard, type DisplayAlbum } from "./albums/AlbumCard";
+import { EntryTimeline } from "./collections/EntryTimeline";
 import {
   elevatedCardLink,
   featureMediaCard,
@@ -75,8 +78,10 @@ export default async function Home() {
 
   const archive = archiveResult.archive;
   const data = archive.toJSON();
+  const archiveLabels = resolveArchiveLabels(data.manifest.labels);
+  const homeSettings = resolveHomeSettings(data.manifest.home);
   const title = data.manifest.title;
-  const entries = getDisplayEntries(data.entries);
+  const entries = getDisplayEntries(data.entries, homeSettings.entryLimit);
   const files = archive.getFiles();
   const heroFile = resolveFirstFile(archive, [
     "hero.jpg",
@@ -84,17 +89,32 @@ export default async function Home() {
     "hero.png",
     "hero.webp",
   ]);
-  const profileFile = archive.resolveFile("profile.png");
+  const profileFile = resolveFirstFile(archive, [
+    "profile.png",
+    "profile.jpg",
+    "profile.jpeg",
+    "profile.webp",
+  ]);
   const heroImage = heroFile
     ? fileSrc(heroFile, title)
     : rendererDefaults.fallbackImages.hero;
   const profileImage = profileFile ? fileSrc(profileFile, title) : undefined;
-  const collections = getDisplayCollections(data, files, ["board", "link"]);
-  const albums = getDisplayAlbums(data.albums);
+  const collections = getDisplayCollections(
+    data,
+    files,
+    ["board", "link"],
+    homeSettings.collectionLimit,
+  );
+  const timelines =
+    homeSettings.timelineEntryLimit > 0 ? getDisplayTimelines(data) : [];
+  const albums = getDisplayAlbums(data.albums, homeSettings.albumLimit);
   const archiveSize = getArchiveSize(data);
   const yearSpan = getYearSpan(data.entries);
   const hasHomeContent =
-    collections.length > 0 || entries.length > 0 || albums.length > 0;
+    collections.length > 0 ||
+    timelines.length > 0 ||
+    entries.length > 0 ||
+    albums.length > 0;
   const footerLinks = getFooterLinks(data.manifest);
   const footerEmail = manifestString(data.manifest, "email");
   const totalRenderTimeMs = Math.round(performance.now() - renderStartedAt);
@@ -119,7 +139,7 @@ export default async function Home() {
     collections.length > 0
       ? {
           href: "/collections",
-          label: `${collections.length} collections`,
+          label: `${collections.length} ${archiveLabels.collections}`,
         }
       : undefined,
     yearSpan > 0
@@ -131,7 +151,10 @@ export default async function Home() {
   ].filter((item): item is { href: string; label: string } => Boolean(item));
 
   return (
-    <I18nProvider defaultLocale={data.manifest.language}>
+    <I18nProvider
+      archiveLabels={data.manifest.labels}
+      defaultLocale={data.manifest.language}
+    >
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="home"
@@ -246,7 +269,7 @@ export default async function Home() {
             target={collection.external ? "_blank" : undefined}
           >
             <Image
-              alt={`${collection.title} collection cover`}
+              alt={`${collection.title} ${archiveLabels.collection} cover`}
               className="object-cover opacity-90 transition duration-500 group-hover:scale-105"
               fill
               sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
@@ -307,6 +330,52 @@ export default async function Home() {
 </section>
 )}
 
+      {timelines.map((timeline) => (
+        <section
+          className="px-5 py-8 lg:px-8 lg:py-10"
+          id={`timeline-${timeline.id}`}
+          key={timeline.id}
+        >
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-8 flex items-start justify-between gap-6">
+              <div className="max-w-[820px]">
+                <h2 className="text-[22px] font-semibold leading-tight text-ink">
+                  {timeline.title}
+                </h2>
+                {timeline.description && (
+                  <p className="mt-4 text-[17px] leading-7 text-muted">
+                    {timeline.description}
+                  </p>
+                )}
+              </div>
+
+              <NextLink
+                className={`hidden ${sectionActionLinkBase} sm:inline-flex`}
+                href={`/collections/${encodeURIComponent(timeline.id)}`}
+              >
+                <T k="common.viewAll" />
+                <ArrowRight aria-hidden="true" size={15} strokeWidth={1.8} />
+              </NextLink>
+            </div>
+
+            <EntryTimeline
+              entries={timeline.entries}
+              limit={homeSettings.timelineEntryLimit}
+            />
+
+            <div className="mt-6 flex sm:hidden">
+              <NextLink
+                className={sectionActionLink}
+                href={`/collections/${encodeURIComponent(timeline.id)}`}
+              >
+                <T k="common.viewAll" />
+                <ArrowRight aria-hidden="true" size={15} strokeWidth={1.8} />
+              </NextLink>
+            </div>
+          </div>
+        </section>
+      ))}
+
 
       {entries.length > 0 && (
       <section className="border-t border-border px-5 py-8 lg:px-8 lg:py-10">
@@ -328,7 +397,7 @@ export default async function Home() {
     </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {entries.slice(0, 6).map((entry) => (
+        {entries.map((entry) => (
           <NextLink
             className={`${elevatedCardLink} p-6`}
             href={`/entries/${entry.id}`}
@@ -505,8 +574,8 @@ export default async function Home() {
   );
 }
 
-function getDisplayEntries(entries: LafEntry[]) {
-  return entries.slice(0, 3);
+function getDisplayEntries(entries: LafEntry[], limit: number) {
+  return entries.slice(0, limit);
 }
 
 function entryExcerpt(entry: LafEntry) {
@@ -645,7 +714,8 @@ function byteLength(value: string) {
 function getDisplayCollections(
   data: LafArchiveJSON,
   files: LafFileAsset[],
-  kind?: "board" | "album" | "link" | string | string[]
+  kind: "board" | "album" | "link" | string | string[] | undefined,
+  limit: number,
 ) {
   const source = kind
     ? data.collections.filter((collection) =>
@@ -659,7 +729,7 @@ function getDisplayCollections(
   const collections = featured.length > 0 ? featured : source;
 
   return collections
-    .slice(0, rendererDefaults.home.collectionLimit)
+    .slice(0, limit)
     .map((collection) => {
       const coverRef =
         collection.cover ??
@@ -697,6 +767,26 @@ function getDisplayCollections(
         external: linkTarget?.external,
       };
     });
+}
+
+function getDisplayTimelines(data: LafArchiveJSON) {
+  const entriesById = new Map(
+    data.entries.map((entry) => [entry.id, entry]),
+  );
+
+  return data.collections
+    .filter((collection) => collection.kind === "timeline")
+    .map((collection) => ({
+      id: collection.id,
+      title: collection.title,
+      description:
+        collection.description ||
+        markdownExcerpt(collection.body.markdown, ""),
+      entries: collection.entries
+        .map((entryId) => entriesById.get(entryId))
+        .filter((entry): entry is LafEntry => Boolean(entry)),
+    }))
+    .filter((timeline) => timeline.entries.length > 0);
 }
 
 function resolveCollectionLink(collection: LafArchiveJSON["collections"][number]) {
@@ -787,8 +877,11 @@ function markdownExcerpt(markdown: string, fallback: string) {
   return text.length > 180 ? `${text.slice(0, 177).trimEnd()}...` : text;
 }
 
-function getDisplayAlbums(albums: LafAlbum[]): DisplayAlbum[] {
-  return albums.slice(0, rendererDefaults.home.albumLimit).map((album) => ({
+function getDisplayAlbums(
+  albums: LafAlbum[],
+  limit: number,
+): DisplayAlbum[] {
+  return albums.slice(0, limit).map((album) => ({
     id: album.id,
     title: album.title,
     count: album.files.length,

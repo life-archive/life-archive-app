@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import {
+  resolveArchiveLabels,
   type LafCollection,
   type LafFileAsset,
 } from "@/lib/life";
@@ -41,10 +42,11 @@ export async function generateMetadata() {
 
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
+  const labels = resolveArchiveLabels(manifest.labels);
 
-  return archivePageMetadata(manifest.title, "Collections", undefined, {
+  return archivePageMetadata(manifest.title, labels.collections, undefined, {
     canonical: "/collections",
-    description: `Browse ${archive.getCollections().length.toLocaleString()} curated collections from ${manifest.title}.`,
+    description: `Browse ${archive.getCollections().length.toLocaleString()} curated ${labels.collections} from ${manifest.title}.`,
     siteUrl: await getSiteUrlFromRequest(manifestSiteUrl(manifest)),
   });
 }
@@ -58,6 +60,7 @@ export default async function CollectionsPage() {
 
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
+  const labels = resolveArchiveLabels(manifest.labels);
   const collections = getDisplayCollections(
     archive.getCollections(),
     archive.getFiles(),
@@ -68,7 +71,10 @@ export default async function CollectionsPage() {
   );
 
   return (
-    <I18nProvider defaultLocale={manifest.language}>
+    <I18nProvider
+      archiveLabels={manifest.labels}
+      defaultLocale={manifest.language}
+    >
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="collections"
@@ -83,7 +89,7 @@ export default async function CollectionsPage() {
               <T k="common.collections" />
             </h1>
             <p className="mt-6 max-w-[680px] text-[22px] leading-[1.45] text-muted">
-              {collections.length.toLocaleString()} collections with{" "}
+              {collections.length.toLocaleString()} {labels.collections} with{" "}
               {totalItems.toLocaleString()} curated items.
             </p>
           </header>
@@ -91,7 +97,11 @@ export default async function CollectionsPage() {
           {collections.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {collections.map((collection) => (
-                <CollectionCard collection={collection} key={collection.id} />
+                <CollectionCard
+                  collection={collection}
+                  collectionLabel={labels.collection}
+                  key={collection.id}
+                />
               ))}
             </div>
           ) : (
@@ -109,13 +119,15 @@ export default async function CollectionsPage() {
 
 function CollectionCard({
   collection,
+  collectionLabel,
 }: {
   collection: DisplayCollection;
+  collectionLabel: string;
 }) {
   const content = (
     <>
       <Image
-        alt={`${collection.title} collection cover`}
+        alt={`${collection.title} ${collectionLabel} cover`}
         className="object-cover opacity-90 transition duration-500 group-hover:scale-105"
         fill
         sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
@@ -200,7 +212,12 @@ function getDisplayCollections(
   files: LafFileAsset[],
 ): DisplayCollection[] {
   return collections
-    .filter((collection) => collection.kind === "board" || collection.kind === "link")
+    .filter(
+      (collection) =>
+        collection.kind === "board" ||
+        collection.kind === "link" ||
+        collection.kind === "timeline",
+    )
     .map((collection) => {
       const coverRef =
         collection.cover ??

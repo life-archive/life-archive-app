@@ -52,7 +52,10 @@ export default async function EntriesPage() {
   const yearSpan = getYearSpan(datedEntries);
 
   return (
-    <I18nProvider defaultLocale={manifest.language}>
+    <I18nProvider
+      archiveLabels={manifest.labels}
+      defaultLocale={manifest.language}
+    >
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="entries"

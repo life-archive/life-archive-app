@@ -50,6 +50,7 @@ MyArchive.life/
       picnic.jpg
   files/
     hero.png
+    profile.png
     documents/
       letter.pdf
 ```
@@ -57,6 +58,8 @@ MyArchive.life/
 Only `life.json` is required to identify and describe the archive. `README.md` and the content folders are optional, although most useful archives will include at least `entries/` or `albums/`. Missing or empty content folders are treated as empty by the reference app.
 
 The `.life` suffix is a naming convention for the archive directory. The archive remains a normal folder and does not need to be packaged into a single binary file.
+
+Archive presentation can be customized without changing the underlying format. For example, `life.json` can rename Collection and Collections for a particular archive, timeline collections can present dated entries as résumé-style sections, and `files/profile.png` can provide a portrait beside the archive name in the reference app's home-page hero.
 
 ## Two content models
 

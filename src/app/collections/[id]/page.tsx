@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, FileText, ImageIcon } from "lucide-react";
 
 import {
+  resolveArchiveLabels,
   tryOpenArchive,
   type LafCollection,
   type LafEntry,
@@ -23,6 +24,7 @@ import {
   archiveUnavailableMetadata,
   manifestSiteUrl,
 } from "../../pageMetadata";
+import { EntryTimeline } from "../EntryTimeline";
 
 const imageExtensions = new Set(["gif", "jpg", "jpeg", "png", "svg", "webp"]);
 
@@ -40,15 +42,18 @@ export async function generateMetadata({ params }: CollectionPageProps) {
 
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
+  const labels = resolveArchiveLabels(manifest.labels);
   const collection = archive.getCollection(id);
+  const collectionLabel =
+    collection?.kind === "timeline" ? "Timeline" : labels.collection;
   const coverFile = collection
     ? getCoverFile(collection, archive.getFiles())
     : undefined;
 
   return archivePageMetadata(
     manifest.title,
-    collection?.title ?? "Collection not found",
-    "Collection",
+    collection?.title ?? `${collectionLabel} not found`,
+    collectionLabel,
     {
       canonical: `/collections/${encodeURIComponent(id)}`,
       description: collection
@@ -71,7 +76,10 @@ export async function generateStaticParams() {
 
   return archive
     .getCollections()
-    .filter((collection) => collection.kind === "board")
+    .filter(
+      (collection) =>
+        collection.kind === "board" || collection.kind === "timeline",
+    )
     .map((collection) => ({
       id: collection.id,
     }));
@@ -87,9 +95,13 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
+  const labels = resolveArchiveLabels(manifest.labels);
   const collection = archive.getCollection(id);
 
-  if (!collection || collection.kind !== "board") {
+  if (
+    !collection ||
+    (collection.kind !== "board" && collection.kind !== "timeline")
+  ) {
     notFound();
   }
 
@@ -108,9 +120,14 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     : rendererDefaults.fallbackImages.collection;
   const description =
     collection.description || firstMarkdownLine(collection.body.markdown);
+  const collectionLabel =
+    collection.kind === "timeline" ? "Timeline" : labels.collection;
 
   return (
-    <I18nProvider defaultLocale={manifest.language}>
+    <I18nProvider
+      archiveLabels={manifest.labels}
+      defaultLocale={manifest.language}
+    >
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="collections"
@@ -121,7 +138,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
       <header className="relative min-h-[520px] overflow-hidden bg-photo-shell text-white">
         <Image
-          alt={`${collection.title} collection cover`}
+          alt={`${collection.title} ${collectionLabel} cover`}
           className="object-cover opacity-80"
           fill
           priority
@@ -134,7 +151,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         <div className="relative mx-auto flex min-h-[520px] max-w-[1440px] items-end px-5 py-6 lg:px-8 lg:py-8">
           <div className="max-w-[1240px] pb-4">
             <p className="text-[13px] font-medium uppercase tracking-[0.12em] text-white/64">
-              <T k="common.collection" />
+              {collectionLabel}
             </p>
             <h1 className="mt-4 font-serif text-[clamp(4rem,9vw,8.5rem)] font-semibold leading-[0.9] tracking-[-0.04em]">
               {collection.title}
@@ -166,7 +183,11 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             className={pillActionLink}
             href="/collections"
           >
-            <T k="common.collections" />
+            {collection.kind === "timeline" ? (
+              "Timeline"
+            ) : (
+              <T k="common.collections" />
+            )}
           </NextLink>
 
           <p className="mt-8 max-w-[900px] font-serif text-[clamp(1.5rem,3vw,2.5rem)] font-medium leading-[1.18] tracking-[-0.02em] text-ink">
@@ -190,40 +211,48 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                 <div className="mb-5 flex items-center gap-2 text-ink">
                   <FileText aria-hidden="true" size={18} strokeWidth={1.8} />
                   <h2 className="text-[22px] font-semibold leading-tight">
-                    <T k="common.entries" />
+                    {collection.kind === "timeline" ? (
+                      "Timeline"
+                    ) : (
+                      <T k="common.entries" />
+                    )}
                   </h2>
                 </div>
-                <div className="space-y-3">
-                  {entries.map((entry) => (
-                    <NextLink
-                      className={`${elevatedCardLink} p-5`}
-                      href={`/entries/${entry.id}`}
-                      key={entry.id}
-                    >
-                      <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-                        {entry.date && <span>{formatDate(entry.date)}</span>}
-                        {entry.kind && <span>{entry.kind}</span>}
-                      </div>
-                      <h3 className="font-serif text-[30px] font-semibold leading-[1.06] tracking-[-0.02em] text-ink">
-                        {entry.title}
-                      </h3>
-                      {entry.body.markdown && (
-                        <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted">
-                          {entryExcerpt(entry.body.markdown)}
-                        </p>
-                      )}
-                      <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-ink">
-                        <T k="common.readEntry" />
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="transition group-hover:translate-x-0.5"
-                          size={15}
-                          strokeWidth={1.8}
-                        />
-                      </span>
-                    </NextLink>
-                  ))}
-                </div>
+                {collection.kind === "timeline" ? (
+                  <EntryTimeline entries={entries} />
+                ) : (
+                  <div className="space-y-3">
+                    {entries.map((entry) => (
+                      <NextLink
+                        className={`${elevatedCardLink} p-5`}
+                        href={`/entries/${entry.id}`}
+                        key={entry.id}
+                      >
+                        <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                          {entry.date && <span>{formatDate(entry.date)}</span>}
+                          {entry.kind && <span>{entry.kind}</span>}
+                        </div>
+                        <h3 className="font-serif text-[30px] font-semibold leading-[1.06] tracking-[-0.02em] text-ink">
+                          {entry.title}
+                        </h3>
+                        {entry.body.markdown && (
+                          <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted">
+                            {entryExcerpt(entry.body.markdown)}
+                          </p>
+                        )}
+                        <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-ink">
+                          <T k="common.readEntry" />
+                          <ArrowRight
+                            aria-hidden="true"
+                            className="transition group-hover:translate-x-0.5"
+                            size={15}
+                            strokeWidth={1.8}
+                          />
+                        </span>
+                      </NextLink>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 

@@ -30,7 +30,21 @@ export type LafArchiveManifest = {
   owner?: string;
   language?: string;
   theme?: LafTheme;
+  labels?: LafArchiveLabels;
+  home?: LafHomeSettings;
   [key: string]: unknown;
+};
+
+export type LafArchiveLabels = {
+  collection?: string;
+  collections?: string;
+};
+
+export type LafHomeSettings = {
+  albumLimit?: number;
+  collectionLimit?: number;
+  entryLimit?: number;
+  timelineEntryLimit?: number;
 };
 
 export type LafMarkdownDocument = {

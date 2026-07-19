@@ -8,6 +8,9 @@ import {
   type ReactNode,
 } from "react";
 
+import { resolveArchiveLabels } from "@/lib/life/labels";
+import type { LafArchiveLabels } from "@/lib/life/types";
+
 import {
   languageStorageKey,
   normalizeLocale,
@@ -28,13 +31,19 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider({
+  archiveLabels,
   children,
   defaultLocale,
 }: {
+  archiveLabels?: LafArchiveLabels;
   children: ReactNode;
   defaultLocale?: string;
 }) {
   const fallbackLocale = normalizeLocale(defaultLocale);
+  const labels = useMemo(
+    () => resolveArchiveLabels(archiveLabels),
+    [archiveLabels],
+  );
   const locale = useSyncExternalStore(
     subscribeToLanguage,
     () => getBrowserLocale(fallbackLocale),
@@ -45,14 +54,35 @@ export function I18nProvider({
     () => ({
       locale,
       setLocale,
-      t: (key, values) => translate(locale, key, values),
+      t: (key, values) =>
+        archiveLabelTranslation(key, labels) ??
+        translate(locale, key, values),
     }),
-    [locale],
+    [labels, locale],
   );
 
   return (
     <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
   );
+}
+
+function archiveLabelTranslation(
+  key: TranslationKey,
+  labels: ReturnType<typeof resolveArchiveLabels>,
+) {
+  if (key === "nav.collections" || key === "common.collections") {
+    return labels.collections;
+  }
+
+  if (key === "common.collection") {
+    return labels.collection;
+  }
+
+  if (key === "empty.noCollections") {
+    return `No ${labels.collections} found in this archive yet.`;
+  }
+
+  return undefined;
 }
 
 export function useI18n() {

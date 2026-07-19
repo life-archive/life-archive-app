@@ -49,10 +49,6 @@ In multi-host mode, the request hostname takes precedence so every archive recei
 ```ts
 defaultLocale: "en",
 defaultTheme: "gallery",
-home: {
-  albumLimit: 20,
-  collectionLimit: 25,
-},
 ```
 
 The built-in theme names are `light`, `dusk`, `gallery`, and `dark`. `defaultTheme` is the application fallback when the selected archive does not specify a theme.
@@ -77,7 +73,27 @@ This allows archives in a multi-host deployment to have different defaults while
 
 The archive manifest's `language` determines the initial interface language when it matches a supported locale. The current built-in locale codes are `en`, `de`, `es`, `fr`, `nl`, `pt`, `it`, `ja`, `zh`, and `ko`. Visitors can change the language in the interface, and their selection is saved locally.
 
-`home.albumLimit` and `home.collectionLimit` cap how many of those items appear on the home page. They do not remove items from the full Albums or Collections pages.
+## Home-page limits
+
+Each archive controls its own home-page limits in `life.json`:
+
+```json
+{
+  "home": {
+    "albumLimit": 20,
+    "collectionLimit": 25,
+    "entryLimit": 3,
+    "timelineEntryLimit": 6
+  }
+}
+```
+
+- `home.albumLimit` caps albums on the home page.
+- `home.collectionLimit` caps normal collection cards on the home page.
+- `home.entryLimit` caps the Recent Entries section.
+- `home.timelineEntryLimit` caps the entries shown in each home-page timeline.
+
+Set any limit to `0` to hide that content from the home page. The full Albums, Collections, Entries, and timeline detail pages remain available. Archives that omit these settings use the values shown above for backward compatibility.
 
 ## Fallback images and metadata
 
@@ -105,4 +121,4 @@ Change cache headers deliberately. Archive files may be replaced without changin
 
 ## Archive configuration belongs in life.json
 
-Use `life.json` for the archive title, language, theme, owner, website, email, and supported social links. Use `README.md` for the archive's About page. See [Archive root, life.json, and README.md](entries/laf-archive-root.md) for the complete format and examples.
+Use `life.json` for the archive title, language, theme, collection labels, owner, website, email, and supported social links. The optional `labels.collection` and `labels.collections` values let each archive rename Collection and Collections throughout the interface. Use `README.md` for the archive's About page. See [Archive root, life.json, and README.md](entries/laf-archive-root.md) for the complete format and examples.

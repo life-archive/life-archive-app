@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Search } from "lucide-react";
 
-import type { LafCollection, LafEntry } from "@/lib/life";
+import {
+  resolveArchiveLabels,
+  type LafCollection,
+  type LafEntry,
+} from "@/lib/life";
 
 import { getSiteUrlFromRequest, tryOpenSiteArchive } from "../archiveSelection";
 import { ArchiveNav } from "../ArchiveNav";
@@ -50,6 +54,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const archive = archiveResult.archive;
   const manifest = archive.getManifest();
+  const labels = resolveArchiveLabels(manifest.labels);
   const rawQuery = (await searchParams).q;
   const query = (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
   const results = query
@@ -57,7 +62,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     : [];
 
   return (
-    <I18nProvider defaultLocale={manifest.language}>
+    <I18nProvider
+      archiveLabels={manifest.labels}
+      defaultLocale={manifest.language}
+    >
       <main className="min-h-screen bg-page text-ink">
         <ArchiveNav
           active="search"
@@ -75,7 +83,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               Search
             </h1>
             <p className="mt-5 text-[19px] leading-[1.65] text-muted">
-              Search titles, collections, tags, and the full text of every entry.
+              Search titles, {labels.collections}, tags, and the full text of
+              every entry.
             </p>
           </header>
 

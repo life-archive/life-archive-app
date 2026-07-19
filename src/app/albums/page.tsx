@@ -48,7 +48,10 @@ export default async function AlbumsPage() {
   const totalPhotos = albums.reduce((total, album) => total + album.count, 0);
 
   return (
-    <I18nProvider defaultLocale={manifest.language}>
+    <I18nProvider
+      archiveLabels={manifest.labels}
+      defaultLocale={manifest.language}
+    >
     <main className="min-h-screen bg-page text-ink">
       <ArchiveNav
         active="albums"

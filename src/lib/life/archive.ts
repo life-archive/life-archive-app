@@ -52,6 +52,22 @@ const manifestSchema = z
     owner: z.string().optional(),
     language: z.string().optional(),
     theme: z.enum(LAF_THEMES).optional(),
+    labels: z
+      .object({
+        collection: z.string().trim().min(1).optional(),
+        collections: z.string().trim().min(1).optional(),
+      })
+      .passthrough()
+      .optional(),
+    home: z
+      .object({
+        albumLimit: z.number().int().min(0).optional(),
+        collectionLimit: z.number().int().min(0).optional(),
+        entryLimit: z.number().int().min(0).optional(),
+        timelineEntryLimit: z.number().int().min(0).optional(),
+      })
+      .passthrough()
+      .optional(),
   })
   .passthrough();
 

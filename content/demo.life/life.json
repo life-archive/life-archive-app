@@ -4,6 +4,16 @@
   "owner": "laf",
   "language": "en-US",
   "theme": "gallery",
+  "labels": {
+    "collection": "Collection",
+    "collections": "Collections"
+  },
+  "home": {
+    "albumLimit": 20,
+    "collectionLimit": 25,
+    "entryLimit": 0,
+    "timelineEntryLimit": 6
+  },
   "website": "https://openlaf.org",
   "github": "https://github.com/life-archive/life-archive-app"
 }

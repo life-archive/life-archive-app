@@ -71,6 +71,8 @@ Optional manifest fields used by the renderer include:
 
 - `language`
 - `owner`
+- `labels.collection` and `labels.collections` for archive-specific collection names
+- `home.albumLimit`, `home.collectionLimit`, `home.entryLimit`, and `home.timelineEntryLimit`
 - `email`
 - `website`
 - social links such as `github`, `linkedin`, `instagram`, `youtube`, and others

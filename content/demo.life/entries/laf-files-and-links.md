@@ -38,7 +38,7 @@ Subdirectories are allowed and are the best way to organize a growing archive.
 The reference app recognizes several filename conventions:
 
 - `hero.jpg`, `hero.jpeg`, `hero.png`, or `hero.webp` can become the home-page hero image.
-- `profile.png` can appear as the archive profile image.
+- `profile.png` can appear as a circular archive portrait beside the archive label and name in the home-page hero. The reference app also recognizes `profile.jpg`, `profile.jpeg`, and `profile.webp`, with PNG taking precedence when more than one exists.
 - `favicon.ico` can become the website icon.
 - A collection's `cover` field can point to an image such as `covers/family-recipes.jpg`.
 
